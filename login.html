@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン - AGU Sailing Team</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        /* このページ専用のスタイル */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-form h1 {
+            margin-bottom: 30px;
+        }
+        #error-message {
+            color: #dc3545;
+            margin-top: 15px;
+            min-height: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <span class="header-logo">AGU Sailing Team Management</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="login-container">
+            <div class="login-form card">
+                <h1>関係者ログイン</h1>
+                <p>パスワードを入力してください</p>
+                <form id="password-form">
+                    <div class="form-group">
+                        <input type="password" id="password-input" required placeholder="パスワード">
+                    </div>
+                    <button type="submit" class="btn">ログイン</button>
+                    <p id="error-message"></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 Aoyama Gakuin University Sailing Team. All Rights Reserved.</p>
+        </div>
+    </footer>
+    <script src="assets/js/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>練習日記 - AGU Sailing Team</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="header-logo">AGU Sailing Team</a>
+            <nav class="header-nav">
+                <ul>
+                    <li><a href="repair.html">修理管理</a></li>
+                    <li><a href="purchase.html">購入品管理</a></li>
+                    <li><a href="diary.html" class="active">練習日記</a></li>
+                </ul>
+            </nav>
+            <button class="hamburger-menu" id="hamburger-menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+    
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>練習日記</h1>
+                <p>日々の活動を記録し、航海技術の向上を目指します。</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="form-container card">
+                    <h2 class="form-title">日記を投稿する</h2>
+                    <form id="diary-form">
+                        <div class="form-grid-diary">
+                            <div class="form-group"><label for="diary-date">日にち</label><input type="date" id="diary-date" required></div>
+                            <div class="form-group"><label for="author">投稿者</label><input type="text" id="author" required></div>
+                            <div class="form-group"><label for="weather">天候</label><input type="text" id="weather" placeholder="例: 晴れ" required></div>
+                            <div class="form-group"><label for="temperature">気温 (°C)</label><input type="number" id="temperature" placeholder="例: 25" required></div>
+                            <div class="form-group"><label for="wind-direction">風向き</label><input type="text" id="wind-direction" placeholder="例: 南西" required></div>
+                            <div class="form-group"><label for="wind-speed">風速 (m/s)</label><input type="number" id="wind-speed" step="0.1" placeholder="例: 5.5" required></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="impression">その日の感想・反省点</label>
+                            <textarea id="impression" rows="6" placeholder="練習内容、反省点、気づいたことなどを自由にご記入ください。" required></textarea>
+                        </div>
+                        <button type="submit" class="btn">投稿する</button>
+                    </form>
+                </div>
+                <div id="diary-list">
+                    <!-- JSで日記がここに追加されます -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 Aoyama Gakuin University Sailing Team. All Rights Reserved.</p>
+        </div>
+    </footer>
+    <script src="assets/js/diary.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>

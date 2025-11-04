@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修理部品管理 - AGU Sailing Team</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="header-logo">AGU Sailing Team</a>
+            <nav class="header-nav">
+                <ul>
+                    <li><a href="repair.html" class="active">修理管理</a></li>
+                    <li><a href="purchase.html">購入品管理</a></li>
+                    <li><a href="diary.html">練習日記</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>修理部品管理</h1>
+                <p>船の修理状況を記録し、チームで共有します。</p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="form-container card">
+                    <h2 class="form-title">新規登録フォーム</h2>
+                    <form id="repair-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="discovery-date">発見日</label>
+                                <input type="date" id="discovery-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="ship-number">船の番号</label>
+                                <input type="text" id="ship-number" placeholder="例: 4711" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="location">修理が必要な場所</label>
+                                <input type="text" id="location" placeholder="例: ティラーエクステンション" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="discoverer">発見者</label>
+                                <input type="text" id="discoverer" placeholder="例: 青山 太郎" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">登録する</button>
+                    </form>
+                </div>
+
+                <div class="table-container card">
+                    <h2 class="table-title">修理リスト</h2>
+                    <div class="table-wrapper">
+                        <table id="repair-table">
+                            <thead>
+                                <tr>
+                                    <th>発見日</th>
+                                    <th>船番号</th>
+                                    <th>修理箇所</th>
+                                    <th>発見者</th>
+                                    <th>完了日</th>
+                                    <th>担当者</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- JSでデータがここに追加されます -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 Aoyama Gakuin University Sailing Team. All Rights Reserved.</p>
+        </div>
+    </footer>
+    <script src="assets/js/repair.js"></script>
+    <script src="assets/js/main.js"></script>
+    <!-- === 編集モーダルここから === -->
+<div class="modal" id="edit-repair-modal">
+    <div class="modal-content card">
+        <span class="modal-close">&times;</span>
+        <h2 class="form-title">修理情報の編集</h2>
+        <form id="edit-repair-form">
+            <input type="hidden" id="edit-repair-id">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="edit-discovery-date">発見日</label>
+                    <input type="date" id="edit-discovery-date" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-ship-number">船の番号</label>
+                    <input type="text" id="edit-ship-number" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-location">修理が必要な場所</label>
+                    <input type="text" id="edit-location" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-discoverer">発見者</label>
+                    <input type="text" id="edit-discoverer" required>
+                </div>
+            </div>
+            <button type="submit" class="btn">更新する</button>
+        </form>
+    </div>
+</div>
+<!-- === 編集モーダルここまで === -->
+</body>
+</html>

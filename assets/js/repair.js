@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // GASのウェブアプリURLをここに貼り付ける
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzzrSPATJT0_pY6wmJbBoyypufFVekntUYbQHnszeLQk10ERrPvTpJ9Ehk0ZbjWWHb5/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyV_dAAb_L_tJJ6TNUFkbTVr3UDVs70rLpk8vJ-pmE1ygYpi_JR6cUBsL_NJeo2zxu8/exec';
 
     const form = document.getElementById('repair-form');
     const tableBody = document.querySelector('#repair-table tbody');

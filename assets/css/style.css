@@ -80,47 +80,32 @@ body {
 /* --- ヒーローセクション (トップページ) --- */
 .hero {
   height: 60vh;
-  position: relative; /* 重ね順の基準点 */
+  position: relative; /* 子要素を配置する基準点 */
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: var(--white);
   overflow: hidden;
+  /* ★★★ ここに直接、背景画像とオーバーレイを両方指定する ★★★ */
+  background: 
+    /* 上の層: 半透明のオーバーレイ */
+    linear-gradient(rgba(0, 40, 80, 0.5), rgba(0, 40, 80, 0.5)),
+    /* 下の層: 背景写真 */
+    url('../images/sailing-background.jpeg');
+  
+  /* ★★★ 背景画像の表示方法を指定 ★★★ */
+  background-size: cover;
+  background-position: center;
 }
 
-/* ヒーローセクションの背景写真 (一番後ろ) */
-.hero::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('../images/hero-background.jpg');
-    background-size: cover;
-    background-position: center;
-    z-index: 0; /* z-indexを0に設定 */
-}
+/* 疑似要素(::before, ::after)は使わないので、もし残っていたら削除 */
 
-/* ヒーローセクションのオーバーレイ (真ん中) */
-.hero::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 40, 80, 0.5);
-    z-index: 1; /* z-indexを1に設定 */
-}
-
-/* 文字コンテンツ (一番手前) */
+/* 文字コンテンツ */
 .hero-content {
-  position: relative; /* ★ これが重要！自身の重ね順を確立 */
-  z-index: 2; /* z-indexを2に設定し、最前面に配置 */
+  /* z-indexやposition:relativeは不要になったので削除 */
   animation: fadeIn 1.5s ease-in-out;
-  animation-fill-mode: forwards; /* ★ これが重要！アニメーション終了後もスタイルを維持 */
+  animation-fill-mode: forwards;
 }
 
 .hero-title {

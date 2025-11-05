@@ -87,14 +87,13 @@ body {
   text-align: center;
   color: var(--white);
   overflow: hidden;
-  /* ★★★ ここに直接、背景画像とオーバーレイを両方指定する ★★★ */
   background: 
     /* 上の層: 半透明のオーバーレイ */
     linear-gradient(rgba(0, 40, 80, 0.5), rgba(0, 40, 80, 0.5)),
     /* 下の層: 背景写真 */
-    url('../images/sailing-background.jpeg');
+    /* ↓↓↓ ここをヒーローセクション用の写真名に正しく修正する ↓↓↓ */
+    url('../images/hero-background.jpeg'); /* もし拡張子が.jpegなら.jpegに */
   
-  /* ★★★ 背景画像の表示方法を指定 ★★★ */
   background-size: cover;
   background-position: center;
 }
@@ -504,7 +503,7 @@ tbody tr:hover {
 /* --- トップページの背景写真設定 --- */
 #management-section {
   position: relative; /* オーバーレイを重ねるための基準位置 */
-  background-image: url('../images/sailing-background.jpeg'); /* 背景写真のパス */
+  background-image: url('../images/hero-background.jpeg'); /* 背景写真のパス */
   background-size: cover; /* 画面全体を覆うように表示 */
   background-position: center; /* 写真の中央を表示 */
   background-attachment: fixed; /* スクロールしても背景を固定 */

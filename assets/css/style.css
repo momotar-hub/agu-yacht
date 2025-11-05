@@ -79,17 +79,17 @@ body {
 
 /* --- ヒーローセクション (トップページ) --- */
 .hero {
-  height: 60vh; /* 画面の高さの60%を占める */
-  position: relative; /* オーバーレイを重ねるための基準 */
+  height: 60vh;
+  position: relative; /* 重ね順の基準点 */
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: var(--white);
-  overflow: hidden; /* はみ出した要素を隠す */
+  overflow: hidden;
 }
 
-/* ヒーローセクションの背景写真 */
+/* ヒーローセクションの背景写真 (一番後ろ) */
 .hero::before {
     content: '';
     position: absolute;
@@ -97,13 +97,13 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-image: url('../images/sailing-background.jpeg'); /* ← ここに写真のパスを指定 */
+    background-image: url('../images/hero-background.jpg');
     background-size: cover;
     background-position: center;
-    z-index: -2; /* 文字より後ろ、オーバーレイよりさらに後ろ */
+    z-index: 0; /* z-indexを0に設定 */
 }
 
-/* ヒーローセクションのオーバーレイ（文字を読みやすくするため） */
+/* ヒーローセクションのオーバーレイ (真ん中) */
 .hero::after {
     content: '';
     position: absolute;
@@ -111,30 +111,29 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 40, 80, 0.5); /* 濃い青系の半透明オーバーレイ */
-    /* 透明度は最後の 0.5 の部分で調整可能 (0.0 〜 1.0) */
-    z-index: -1; /* 文字より後ろ */
+    background-color: rgba(0, 40, 80, 0.5);
+    z-index: 1; /* z-indexを1に設定 */
 }
 
+/* 文字コンテンツ (一番手前) */
 .hero-content {
+  position: relative; /* ★ これが重要！自身の重ね順を確立 */
+  z-index: 2; /* z-indexを2に設定し、最前面に配置 */
   animation: fadeIn 1.5s ease-in-out;
-  z-index: 1; /* 文字コンテンツが一番手前に来るように */
+  animation-fill-mode: forwards; /* ★ これが重要！アニメーション終了後もスタイルを維持 */
 }
-/* .hero-title と .hero-subtitle のスタイルは変更なし */
-.hero-content {
-  animation: fadeIn 1.5s ease-in-out;
-}
+
 .hero-title {
-  font-size: 4.5rem; /* メインタイトルの文字を大きくして存在感を出す */
+  font-size: 4.5rem;
   font-weight: 700;
-  margin-bottom: 0.5rem; /* サブタイトルとの間隔を少し詰める */
-  letter-spacing: 0.1em; /* 文字間を少し広げて上品に見せる */
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* 文字に影を付けて視認性を上げる */
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.1em;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 .hero-subtitle {
-  font-size: 2.0rem; /* サブタイトルも少し大きくしてバランスを取る */
-  font-weight: 400; /* メインタイトルより少し細くしてメリハリをつける */
-  letter-spacing: 0.05em; /* こちらも少し文字間を調整 */
+  font-size: 2.0rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 

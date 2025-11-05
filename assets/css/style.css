@@ -103,7 +103,8 @@ body {
 
 /* 文字コンテンツ */
 .hero-content {
-  /* z-indexやposition:relativeは不要になったので削除 */
+  position: relative; /* 重ね順のコンテキストを確立 */
+  z-index: 1;         /* 背景(z-index:0)より手前に表示 */
   animation: fadeIn 1.5s ease-in-out;
   animation-fill-mode: forwards;
 }

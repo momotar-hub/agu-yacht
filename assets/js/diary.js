@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // GASのウェブアプリURLをここに貼り付ける
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyV_dAAb_L_tJJ6TNUFkbTVr3UDVs70rLpk8vJ-pmE1ygYpi_JR6cUBsL_NJeo2zxu8/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwuzMv1L3ALBNG6tbJxh13nvQnA0Tg8mQV-7zfr6ZXslwaA5SDGlujAHKr2UxBCsAB-/exec';
 
     const form = document.getElementById('diary-form');
     const diaryList = document.getElementById('diary-list');
@@ -83,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${GAS_URL}?action=getDiaries`);
             const result = await response.json();
+            console.log("GASから受け取ったデータ:", result);
             if (result.status === 'success') {
                 diaryEntries = result.data;
                 renderDiaries();

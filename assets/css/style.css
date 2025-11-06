@@ -529,3 +529,36 @@ tbody tr:hover {
 #management-section .section-description {
   color: var(--primary-color); /* 文字が背景に埋もれないよう、濃い色に */
 }
+
+/* --- ページネーション --- */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 40px;
+}
+
+.page-btn {
+  background-color: var(--white);
+  color: var(--primary-color);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  width: 40px;
+  height: 40px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.page-btn:hover {
+  background-color: var(--light-gray);
+  border-color: var(--secondary-color);
+}
+
+.page-btn.active {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border-color: var(--primary-color);
+}

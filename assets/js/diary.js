@@ -26,7 +26,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const showLoading = () => diaryList.innerHTML = '<p style="text-align:center;">読み込み中...</p>';
 
     const renderDiaries = () => {
-        // 既存のページネーションボタンがあれば削除
         const existingPagination = document.querySelector('.pagination');
         if (existingPagination) {
             existingPagination.remove();
@@ -50,10 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         paginatedEntries.forEach(entry => {
             if (!entry || !entry.id) return;
-
             const card = document.createElement('div');
             card.className = 'card';
-            
             const diaryDate = formatDate(entry.date);
             const diaryAuthor = entry.author || '名無し';
             const diaryWeather = entry.weather || '不明';
@@ -61,12 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const diaryWindDirection = entry.windDirection || '不明';
             const diaryWindSpeed = (entry.windSpeed !== null && entry.windSpeed !== undefined && entry.windSpeed !== '') ? `${entry.windSpeed} m/s` : '不明';
             const diaryImpression = (entry.impression || '').replace(/\n/g, '<br>');
-
             let comments = [];
             if (entry.comments && typeof entry.comments === 'string' && entry.comments.trim().startsWith('[')) {
                 try { comments = JSON.parse(entry.comments); } catch (e) { console.error('コメントのJSONパースに失敗しました:', entry.comments, e); }
             }
-
             card.innerHTML = `
                 <button class="action-btn delete-btn" data-id="${entry.id}">削除</button>
                 <div class="diary-header">
@@ -81,56 +76,56 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div>風向き: <span>${diaryWindDirection}</span></div>
                     <div>風速: <span>${diaryWindSpeed}</span></div>
                 </div>
-                <div class="diary-body">
-                    <p>${diaryImpression}</p>
-                </div>
+                <div class="diary-body"><p>${diaryImpression}</p></div>
                 <div class="comment-section">
                     <h4>コメント</h4>
                     <div class="comment-list">
-                        ${comments.length > 0 ? comments.map(c => `
-                            <div class="comment">
-                                <p>${c.text || ''}</p>
-                                <small>by ${c.author || '名無し'}</small>
-                            </div>
-                        `).join('') : '<p>まだコメントはありません。</p>'}
+                        ${comments.length > 0 ? comments.map(c => `<div class="comment"><p>${c.text || ''}</p><small>by ${c.author || '名無し'}</small></div>`).join('') : '<p>まだコメントはありません。</p>'}
                     </div>
                     <form class="comment-form" data-id="${entry.id}">
-                        <input class="form-group" type="text" placeholder="名前" required>
-                        <input class="form-group" type="text" placeholder="コメントを入力" required>
-                        <button type="submit" class="btn">送信</button>
+                        <input class="form-group" type="text" placeholder="名前" required><input class="form-group" type="text" placeholder="コメントを入力" required><button type="submit" class="btn">送信</button>
                     </form>
-                </div>
-            `;
+                </div>`;
             diaryList.appendChild(card);
         });
-
         renderPagination();
     };
 
     const renderPagination = () => {
         const totalPages = Math.ceil(allDiaryEntries.length / entriesPerPage);
         if (totalPages <= 1) return;
-
         let paginationHTML = '<div class="pagination">';
         for (let i = 1; i <= totalPages; i++) {
             paginationHTML += `<button class="page-btn ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</button>`;
         }
         paginationHTML += '</div>';
-
         diaryList.insertAdjacentHTML('afterend', paginationHTML);
     };
     
-    const postData = async (action, data) => { /* ... (変更なし) ... */ };
+    // ★★★ ここからが省略されていた部分です ★★★
+    const postData = async (action, data) => {
+        try {
+            const response = await fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action, data })
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error posting data:', error);
+            alert('通信エラーが発生しました。');
+            return { status: 'error' };
+        }
+    };
     
     const fetchAndRender = async () => {
         showLoading();
         try {
             const response = await fetch(`${GAS_URL}?action=getDiaries`);
             const result = await response.json();
-
             if (result.status === 'success' && Array.isArray(result.data)) {
-                allDiaryEntries = result.data; // すべてのデータを保持
-                currentPage = 1; // データを再取得したら1ページ目に戻る
+                allDiaryEntries = result.data;
+                currentPage = 1;
                 renderDiaries();
             } else {
                  console.error("GASから予期しない形式のデータが返されました:", result);
@@ -142,20 +137,61 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ページネーションボタンがクリックされた時の処理を追加
     document.body.addEventListener('click', (e) => {
         if (e.target.matches('.page-btn')) {
             const page = parseInt(e.target.dataset.page);
             currentPage = page;
             renderDiaries();
-            window.scrollTo(0, 0); // ページトップにスクロール
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     });
 
-    // --- 既存のイベントリスナー (変更なし) ---
-    form.addEventListener('submit', async (e) => { /* ... */ });
-    diaryList.addEventListener('click', async (e) => { /* ... */ });
-    diaryList.addEventListener('submit', async (e) => { /* ... */ });
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newEntryData = {
+            date: document.getElementById('diary-date').value,
+            author: document.getElementById('author').value,
+            weather: document.getElementById('weather').value,
+            temperature: document.getElementById('temperature').value,
+            windDirection: document.getElementById('wind-direction').value,
+            windSpeed: document.getElementById('wind-speed').value,
+            impression: document.getElementById('impression').value,
+        };
+        const result = await postData('addDiary', newEntryData);
+        if (result.status === 'success') {
+            form.reset();
+            fetchAndRender();
+        } else {
+            alert('投稿に失敗しました。');
+        }
+    });
+
+    diaryList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('delete-btn')) {
+            const id = e.target.dataset.id;
+            if (confirm('この日記を削除してもよろしいですか？')) {
+                const result = await postData('deleteDiary', { id });
+                if (result.status === 'success') fetchAndRender();
+                else alert('削除に失敗しました。');
+            }
+        }
+    });
+
+    diaryList.addEventListener('submit', async (e) => {
+        if (e.target.classList.contains('comment-form')) {
+            e.preventDefault();
+            const id = e.target.dataset.id;
+            const authorInput = e.target.querySelector('input:nth-child(1)');
+            const textInput = e.target.querySelector('input:nth-child(2)');
+            const commentData = { author: authorInput.value, text: textInput.value };
+            const result = await postData('addComment', { id, comment: commentData });
+            if (result.status === 'success') {
+                fetchAndRender();
+            } else {
+                alert('コメントの投稿に失敗しました。');
+            }
+        }
+    });
 
     fetchAndRender();
 });

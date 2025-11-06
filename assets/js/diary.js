@@ -6,6 +6,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const diaryList = document.getElementById('diary-list');
     let diaryEntries = [];
 
+    // 【最終防衛ライン】どんな形式の日付でもYYYY-MM-DDにする関数
+    const formatDate = (dateString) => {
+        if (!dateString) return '日付不明';
+        
+        if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+            return dateString;
+        }
+
+        try {
+            const date = new Date(dateString);
+            
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+
+            if (isNaN(year)) {
+                return dateString.substring(0, 10);
+            }
+            return `${year}-${month}-${day}`;
+        } catch (e) {
+            return String(dateString).substring(0, 10);
+        }
+    };
+
     const showLoading = () => diaryList.innerHTML = '<p style="text-align:center;">読み込み中...</p>';
 
     const renderDiaries = () => {
@@ -15,29 +39,25 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        // 日付のソート処理をより安全に
         diaryEntries.sort((a, b) => {
-            // 無効な日付データがあってもエラーにならないようにする
             const dateA = a.date ? new Date(a.date) : 0;
             const dateB = b.date ? new Date(b.date) : 0;
             return dateB - dateA;
         });
 
         diaryEntries.forEach(entry => {
-            if (!entry || !entry.id) return; // 無効なエントリはスキップ
+            if (!entry || !entry.id) return;
 
             const card = document.createElement('div');
             card.className = 'card';
             
-            // --- ★★★ データを安全に処理する最終版 ★★★ ---
-            const diaryDate = entry.date || '日付不明'; // GASがフォーマット済みなので、そのまま表示
+            const diaryDate = formatDate(entry.date);
             const diaryAuthor = entry.author || '名無し';
             const diaryWeather = entry.weather || '不明';
             const diaryTemperature = (entry.temperature !== null && entry.temperature !== undefined && entry.temperature !== '') ? `${entry.temperature}°C` : '不明';
             const diaryWindDirection = entry.windDirection || '不明';
             const diaryWindSpeed = (entry.windSpeed !== null && entry.windSpeed !== undefined && entry.windSpeed !== '') ? `${entry.windSpeed} m/s` : '不明';
             const diaryImpression = (entry.impression || '').replace(/\n/g, '<br>');
-
             let comments = [];
             if (entry.comments && typeof entry.comments === 'string' && entry.comments.trim().startsWith('[')) {
                 try {
@@ -46,7 +66,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('コメントのJSONパースに失敗しました:', entry.comments, e);
                 }
             }
-            // --- ★★★ ここまで ★★★ ---
 
             card.innerHTML = `
                 <button class="action-btn delete-btn" data-id="${entry.id}">削除</button>
@@ -86,15 +105,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
     
-    // postData関数は変更なし
-    const postData = async (action, data) => { /* ... */ };
-
+    const postData = async (action, data) => {
+        try {
+            const response = await fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action, data })
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error posting data:', error);
+            alert('通信エラーが発生しました。');
+            return { status: 'error' };
+        }
+    };
+    
     const fetchAndRender = async () => {
         showLoading();
         try {
             const response = await fetch(`${GAS_URL}?action=getDiaries`);
             const result = await response.json();
-            console.log("GASから受け取ったデータ:", result); // デバッグ用に残しておきます
+            console.log("GASから受け取ったデータ:", result);
 
             if (result.status === 'success' && Array.isArray(result.data)) {
                 diaryEntries = result.data;
@@ -109,12 +140,55 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // formのsubmitリスナー等は変更なし
-    form.addEventListener('submit', async (e) => { /* ... */ });
-    diaryList.addEventListener('click', async (e) => { /* ... */ });
-    diaryList.addEventListener('submit', async (e) => { /* ... */ });
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const newEntryData = {
+            date: document.getElementById('diary-date').value,
+            author: document.getElementById('author').value,
+            weather: document.getElementById('weather').value,
+            temperature: document.getElementById('temperature').value,
+            windDirection: document.getElementById('wind-direction').value,
+            windSpeed: document.getElementById('wind-speed').value,
+            impression: document.getElementById('impression').value,
+        };
+        const result = await postData('addDiary', newEntryData);
+        if (result.status === 'success') {
+            form.reset();
+            fetchAndRender();
+        } else {
+            alert('投稿に失敗しました。');
+        }
+    });
+
+    diaryList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('delete-btn')) {
+            const id = e.target.dataset.id;
+            if (confirm('この日記を削除してもよろしいですか？')) {
+                const result = await postData('deleteDiary', { id });
+                if (result.status === 'success') fetchAndRender();
+                else alert('削除に失敗しました。');
+            }
+        }
+    });
+
+    diaryList.addEventListener('submit', async (e) => {
+        if (e.target.classList.contains('comment-form')) {
+            e.preventDefault();
+            const id = e.target.dataset.id;
+            const authorInput = e.target.querySelector('input:nth-child(1)');
+            const textInput = e.target.querySelector('input:nth-child(2)');
+            const commentData = {
+                author: authorInput.value,
+                text: textInput.value
+            };
+            const result = await postData('addComment', { id, comment: commentData });
+            if (result.status === 'success') {
+                fetchAndRender();
+            } else {
+                alert('コメントの投稿に失敗しました。');
+            }
+        }
+    });
 
     fetchAndRender();
-
-    // ↓↓↓ 省略した部分を含めた全文コードはここにペースト ↓↓↓
 });

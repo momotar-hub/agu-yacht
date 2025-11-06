@@ -1,15 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzK0Y_p9fuwXSvtMWYi0VNO00rbiKz2YuXntzh6o3duxMMDu8KoxCA7PjIPbMvoN7nG/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzHt_hHjT242ttex2kNQlImMsgtF6H0JMCO51roxYzTTdonzkdhkqozHyiY6WqyZS-G/exec';
 
     const form = document.getElementById('diary-form');
     const diaryList = document.getElementById('diary-list');
     
-    let allDiaryEntries = []; // すべての日記データを保持する配列
-    let currentPage = 1; // 現在のページ番号
-    const entriesPerPage = 10; // 1ページに表示する日記の数
+    let allDiaryEntries = [];
+    let currentPage = 1;
+    const entriesPerPage = 10;
 
-    // 【最終防衛ライン】どんな形式の日付でもYYYY-MM-DDにする関数
     const formatDate = (dateString) => {
         if (!dateString) return '日付不明';
         if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) { return dateString; }
@@ -27,9 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const renderDiaries = () => {
         const existingPagination = document.querySelector('.pagination');
-        if (existingPagination) {
-            existingPagination.remove();
-        }
+        if (existingPagination) { existingPagination.remove(); }
         
         diaryList.innerHTML = '';
         if (!allDiaryEntries || allDiaryEntries.length === 0) {
@@ -37,11 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        allDiaryEntries.sort((a, b) => {
-            const dateA = a.date ? new Date(a.date) : 0;
-            const dateB = b.date ? new Date(b.date) : 0;
-            return dateB - dateA;
-        });
+        allDiaryEntries.sort((a, b) => (new Date(b.date) - new Date(a.date)));
 
         const startIndex = (currentPage - 1) * entriesPerPage;
         const endIndex = startIndex + entriesPerPage;
@@ -65,22 +58,21 @@ document.addEventListener('DOMContentLoaded', () => {
             card.innerHTML = `
                 <button class="action-btn delete-btn" data-id="${entry.id}">削除</button>
                 <div class="diary-header">
-                    <div>
-                        <div class="diary-date">${diaryDate}</div>
-                        <div class="diary-author">投稿者: ${diaryAuthor}</div>
-                    </div>
+                    <div><div class="diary-date">${diaryDate}</div><div class="diary-author">投稿者: ${diaryAuthor}</div></div>
                 </div>
                 <div class="diary-weather-grid">
-                    <div>天候: <span>${diaryWeather}</span></div>
-                    <div>気温: <span>${diaryTemperature}</span></div>
-                    <div>風向き: <span>${diaryWindDirection}</span></div>
-                    <div>風速: <span>${diaryWindSpeed}</span></div>
+                    <div>天候: <span>${diaryWeather}</span></div><div>気温: <span>${diaryTemperature}</span></div><div>風向き: <span>${diaryWindDirection}</span></div><div>風速: <span>${diaryWindSpeed}</span></div>
                 </div>
                 <div class="diary-body"><p>${diaryImpression}</p></div>
                 <div class="comment-section">
                     <h4>コメント</h4>
                     <div class="comment-list">
-                        ${comments.length > 0 ? comments.map(c => `<div class="comment"><p>${c.text || ''}</p><small>by ${c.author || '名無し'}</small></div>`).join('') : '<p>まだコメントはありません。</p>'}
+                        ${comments.length > 0 ? comments.map((c, index) => `
+                            <div class="comment">
+                                <button class="comment-delete-btn" title="コメントを削除" data-diary-id="${entry.id}" data-comment-index="${index}">&times;</button>
+                                <p>${c.text || ''}</p>
+                                <small>by ${c.author || '名無し'}</small>
+                            </div>`).join('') : '<p>まだコメントはありません。</p>'}
                     </div>
                     <form class="comment-form" data-id="${entry.id}">
                         <input class="form-group" type="text" placeholder="名前" required><input class="form-group" type="text" placeholder="コメントを入力" required><button type="submit" class="btn">送信</button>
@@ -102,7 +94,6 @@ document.addEventListener('DOMContentLoaded', () => {
         diaryList.insertAdjacentHTML('afterend', paginationHTML);
     };
     
-    // ★★★ ここからが省略されていた部分です ★★★
     const postData = async (action, data) => {
         try {
             const response = await fetch(GAS_URL, {
@@ -125,7 +116,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await response.json();
             if (result.status === 'success' && Array.isArray(result.data)) {
                 allDiaryEntries = result.data;
-                currentPage = 1;
                 renderDiaries();
             } else {
                  console.error("GASから予期しない形式のデータが返されました:", result);
@@ -140,9 +130,39 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.addEventListener('click', (e) => {
         if (e.target.matches('.page-btn')) {
             const page = parseInt(e.target.dataset.page);
-            currentPage = page;
-            renderDiaries();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (page !== currentPage) {
+                currentPage = page;
+                renderDiaries();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+    });
+
+    diaryList.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('delete-btn')) {
+            const id = e.target.dataset.id;
+            if (confirm('この日記を削除してもよろしいですか？')) {
+                const result = await postData('deleteDiary', { id });
+                if (result.status === 'success') {
+                    // データを再取得して先頭ページに戻る
+                    currentPage = 1;
+                    fetchAndRender();
+                } else {
+                    alert('削除に失敗しました。');
+                }
+            }
+        }
+        if (e.target.classList.contains('comment-delete-btn')) {
+            const diaryId = e.target.dataset.diaryId;
+            const commentIndex = e.target.dataset.commentIndex;
+            if (confirm('このコメントを削除してもよろしいですか？')) {
+                const result = await postData('deleteComment', { diaryId: diaryId, commentIndex: commentIndex });
+                if (result.status === 'success') {
+                    fetchAndRender();
+                } else {
+                    alert('コメントの削除に失敗しました。');
+                }
+            }
         }
     });
 
@@ -160,20 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await postData('addDiary', newEntryData);
         if (result.status === 'success') {
             form.reset();
+            currentPage = 1;
             fetchAndRender();
         } else {
             alert('投稿に失敗しました。');
-        }
-    });
-
-    diaryList.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('delete-btn')) {
-            const id = e.target.dataset.id;
-            if (confirm('この日記を削除してもよろしいですか？')) {
-                const result = await postData('deleteDiary', { id });
-                if (result.status === 'success') fetchAndRender();
-                else alert('削除に失敗しました。');
-            }
         }
     });
 

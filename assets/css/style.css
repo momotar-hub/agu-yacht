@@ -562,3 +562,28 @@ tbody tr:hover {
   color: var(--white);
   border-color: var(--primary-color);
 }
+
+/* --- コメント削除ボタン --- */
+.comment {
+  position: relative; /* 削除ボタンを配置する基準 */
+  padding-left: 30px; /* ボタンを置くスペースを確保 */
+}
+
+.comment-delete-btn {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s ease;
+}
+
+.comment-delete-btn:hover {
+  color: #dc3545; /* 赤色 */
+}

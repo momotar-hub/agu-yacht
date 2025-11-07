@@ -217,6 +217,7 @@ body {
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
+  min-width: 0;
 }
 .form-group input:focus, .form-group textarea:focus {
   outline: none;

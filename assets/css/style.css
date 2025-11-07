@@ -481,6 +481,19 @@ tbody tr:hover {
   th, td {
       word-break: break-all;
   }
+  td:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 5px; /* ボタン間の少しの隙間 */
+    align-items: flex-start; /* ボタンを左揃えにする */
+}
+
+.action-btn {
+    width: 100%; /* ボタンの幅をセルの幅いっぱいに広げる */
+    text-align: center; /* ボタン内の文字を中央揃えに */
+    margin-left: 0 !important; /* delete-btnの左マージンをリセット */
+    margin-right: 0 !important; /* edit-btnの右マージンをリセット */
+}
 }
 /* --- Googleカレンダーのレスポンシブ対応 --- */
 .calendar-wrapper {
@@ -566,13 +579,14 @@ tbody tr:hover {
 /* --- コメント削除ボタン --- */
 .comment {
   position: relative; /* 削除ボタンを配置する基準 */
-  padding-left: 30px; /* ボタンを置くスペースを確保 */
+  padding-right: 30px; /* 右側にボタンを置くスペースを確保 */
 }
 
 .comment-delete-btn {
   position: absolute;
   top: 50%;
-  left: 8px;
+  right: 8px; /* 右から8pxの位置に変更 */
+  left: auto; /* leftの指定をリセット */
   transform: translateY(-50%);
   background: none;
   border: none;

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // GASのウェブアプリURLをここに貼り付ける
+    // あなたの最新のGASウェブアプリURL
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzHt_hHjT242ttex2kNQlImMsgtF6H0JMCO51roxYzTTdonzkdhkqozHyiY6WqyZS-G/exec';
 
     const form = document.getElementById('purchase-form');
@@ -11,7 +11,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
-        return dateString.split('T')[0];
+        if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) { return dateString; }
+        try {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            if (isNaN(year)) { return String(dateString).substring(0, 10); }
+            return `${year}-${month}-${day}`;
+        } catch (e) { return String(dateString).substring(0, 10); }
     };
 
     const showLoading = () => tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">読み込み中...</td></tr>';
@@ -48,7 +56,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             return await response.json();
         } catch (error) {
-            console.error('Error posting data:', error);
             alert('通信エラーが発生しました。');
             return { status: 'error' };
         }

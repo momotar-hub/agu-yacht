@@ -1,31 +1,32 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // GASのウェブアプリURLをここに貼り付ける
+    // あなたの最新のGASウェブアプリURL
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzHt_hHjT242ttex2kNQlImMsgtF6H0JMCO51roxYzTTdonzkdhkqozHyiY6WqyZS-G/exec';
 
     const form = document.getElementById('repair-form');
     const tableBody = document.querySelector('#repair-table tbody');
-    
-    // --- 編集モーダル関連 ---
     const editModal = document.getElementById('edit-repair-modal');
     const editForm = document.getElementById('edit-repair-form');
     const closeModalBtn = editModal.querySelector('.modal-close');
+    let repairs = [];
 
-    let repairs = []; // データを保持する配列
-
-    // --- 日付を 'YYYY-MM-DD' 形式に整形するヘルパー関数 ---
     const formatDate = (dateString) => {
         if (!dateString) return '';
-        // 'T'以降の時間情報などを切り捨てる
-        return dateString.split('T')[0];
+        if (typeof dateString === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateString)) { return dateString; }
+        try {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            if (isNaN(year)) { return String(dateString).substring(0, 10); }
+            return `${year}-${month}-${day}`;
+        } catch (e) { return String(dateString).substring(0, 10); }
     };
 
-    // ローディング表示
     const showLoading = () => tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">読み込み中...</td></tr>';
     
-    // データをテーブルに表示する関数
     const renderTable = () => {
         tableBody.innerHTML = '';
-        if(repairs.length === 0) {
+        if (repairs.length === 0) {
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">データがありません</td></tr>';
             return;
         }
@@ -50,8 +51,21 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(row);
         });
     };
+
+    const postData = async (action, data) => {
+        try {
+            const response = await fetch(GAS_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action, data })
+            });
+            return await response.json();
+        } catch (error) {
+            alert('通信エラーが発生しました。');
+            return { status: 'error' };
+        }
+    };
     
-    // --- スプレッドシートからデータを取得する関数 ---
     const fetchAndRender = async () => {
         showLoading();
         try {
@@ -61,34 +75,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 repairs = result.data;
                 renderTable();
             } else {
-                console.error('Failed to fetch data:', result.message);
                 tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">データの読み込みに失敗しました</td></tr>';
             }
         } catch (error) {
-            console.error('Error fetching data:', error);
             tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">エラーが発生しました</td></tr>';
         }
     };
 
-    // --- 汎用的なデータ送信関数 ---
-    const postData = async (action, data) => {
-        try {
-            const response = await fetch(GAS_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // CORS対策
-                body: JSON.stringify({ action, data })
-            });
-            return await response.json();
-        } catch (error) {
-            console.error('Error posting data:', error);
-            alert('通信エラーが発生しました。');
-            return { status: 'error' };
-        }
-    };
-
-    // --- 各イベントリスナー ---
-
-    // 新規登録
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const newRepairData = {
@@ -100,13 +93,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const result = await postData('addRepair', newRepairData);
         if (result.status === 'success') {
             form.reset();
-            fetchAndRender(); // 再読み込み
+            fetchAndRender();
         } else {
             alert('登録に失敗しました。');
         }
     });
 
-    // 編集、完了、削除
     tableBody.addEventListener('click', async (e) => {
         const target = e.target;
         const id = target.dataset.id;
@@ -137,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 編集フォームの送信
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const updatedData = {
@@ -156,13 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // モーダルを閉じる
     const closeModal = () => editModal.style.display = 'none';
     closeModalBtn.addEventListener('click', closeModal);
     window.addEventListener('click', (e) => {
         if (e.target == editModal) closeModal();
     });
 
-    // 初期データの読み込み
     fetchAndRender();
 });

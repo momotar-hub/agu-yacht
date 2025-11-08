@@ -217,7 +217,7 @@ body {
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
-  min-width: 0; /* 日付入力欄のはみ出し防止 */
+  min-width: 0;
 }
 .form-group input:focus, .form-group textarea:focus {
   outline: none;
@@ -347,13 +347,18 @@ td:last-child {
   .form-grid, .form-grid-diary { grid-template-columns: 1fr; }
   .card { padding: 20px; }
   
-  /* ▼▼▼ テーブルのレスポンシブ対応（スマホ表示時） ▼▼▼ */
+  /* Safariの日付入力欄はみ出し対策 */
+  .form-grid .form-group input[type="date"] {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  /* テーブルのレスポンシブ対応 */
   .table-wrapper {
       overflow-x: auto;
   }
   .table-wrapper table {
-      width: auto;
-      min-width: 100%;
+      width: 100%;
   }
   .table-wrapper th, 
   .table-wrapper td {
@@ -361,8 +366,9 @@ td:last-child {
       padding: 12px 8px;
       font-size: 0.9rem;
   }
-  .table-wrapper td:nth-child(7) { /* 修理管理テーブルの7番目のセル（備考欄） */
+  #repair-table td:nth-child(7) { /* 修理管理テーブルの備考欄 */
       white-space: normal;
+      min-width: 200px;
   }
   .table-wrapper td:last-child {
       white-space: normal;
@@ -376,7 +382,6 @@ td:last-child {
       text-align: center;
       margin: 0 !important;
   }
-  /* ▲▲▲ テーブルのレスポンシブ対応ここまで ▲▲▲ */
 }
 
 /* --- Googleカレンダーのレスポンシブ対応 --- */

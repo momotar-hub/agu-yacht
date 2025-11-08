@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxtdqo62VBgscrrY2rG8qMuu2X6Kgis-3Q44aKYkvzKEsVdPVvci1qxYE_R179QMVV-/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwDkZmTmNHYelGQpV7tcZmjGGGHiB_0YfSg69Id9ZEKjTPC9jZj90ZAzJGKRPohWxaq/exec';
 
     const form = document.getElementById('purchase-form');
     const tableBody = document.querySelector('#purchase-table tbody');
@@ -22,22 +22,28 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { return String(dateString).substring(0, 10); }
     };
 
-    const showLoading = () => tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">読み込み中...</td></tr>';
+    const showLoading = () => tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">読み込み中...</td></tr>';
 
     const renderTable = () => {
         tableBody.innerHTML = '';
         if (purchases.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">データがありません</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">データがありません</td></tr>';
             return;
         }
         purchases.sort((a, b) => new Date(b.date) - new Date(a.date));
         purchases.forEach(item => {
             const row = document.createElement('tr');
+            const isPaid = item.status === '精算済み';
             row.innerHTML = `
                 <td>${formatDate(item.date)}</td>
                 <td>${Number(item.price).toLocaleString()}</td>
                 <td>${item.name}</td>
                 <td>${item.location}</td>
+                <td>
+                    <button class="status-btn ${isPaid ? 'paid' : 'unpaid'}" data-id="${item.id}" data-status="${item.status || '立て替え中'}">
+                        ${item.status || '立て替え中'}
+                    </button>
+                </td>
                 <td>
                     <button class="action-btn edit-btn" data-id="${item.id}">編集</button>
                     <button class="action-btn delete-btn" data-id="${item.id}">削除</button>
@@ -70,10 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 purchases = result.data;
                 renderTable();
             } else {
-                tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">データの読み込みに失敗しました</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">データの読み込みに失敗しました</td></tr>';
             }
         } catch (error) {
-            tableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;">エラーが発生しました</td></tr>';
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">エラーが発生しました</td></tr>';
         }
     };
 
@@ -84,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
             price: document.getElementById('price').value,
             name: document.getElementById('item-name').value,
             location: document.getElementById('storage-location').value,
+            status: document.querySelector('input[name="status"]:checked').value
         };
         const result = await postData('addPurchase', newItemData);
         if (result.status === 'success') {
@@ -99,7 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = target.dataset.id;
         if (!id) return;
 
-        if (target.classList.contains('edit-btn')) {
+        if (target.classList.contains('status-btn')) {
+            const currentStatus = target.dataset.status;
+            const newStatus = (currentStatus === '精算済み') ? '立て替え中' : '精算済み';
+            const result = await postData('updatePurchaseStatus', { id, status: newStatus });
+            if (result.status === 'success') {
+                fetchAndRender();
+            } else { alert('ステータスの更新に失敗しました。'); }
+        } else if (target.classList.contains('edit-btn')) {
             const itemToEdit = purchases.find(p => p.id.toString() === id);
             document.getElementById('edit-purchase-id').value = itemToEdit.id;
             document.getElementById('edit-purchase-date').value = formatDate(itemToEdit.date);

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <script src="assets/js/auth.js"></script>
@@ -7,9 +8,11 @@
     <title>購入商品管理 - AGU Sailing Club</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Noto+Sans+JP:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
     <header class="header">
         <div class="container">
@@ -30,7 +33,7 @@
             </button>
         </div>
     </header>
-    
+
     <main>
         <section class="page-header">
             <div class="container">
@@ -76,6 +79,7 @@
                                     <th>金額 (円)</th>
                                     <th>商品名</th>
                                     <th>収納場所</th>
+                                    
                                     <th>操作</th>
                                 </tr>
                             </thead>
@@ -94,35 +98,44 @@
             <p>&copy; 2023 Aoyama Gakuin University Sailing Club. All Rights Reserved.</p>
         </div>
     </footer>
- <div class="modal" id="edit-purchase-modal">
-    <div class="modal-content card">
-        <span class="modal-close">&times;</span>
-        <h2 class="form-title">購入情報の編集</h2>
-        <form id="edit-purchase-form">
-            <input type="hidden" id="edit-purchase-id">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="edit-purchase-date">購入日</label>
-                    <input type="date" id="edit-purchase-date" required>
+    <div class="modal" id="edit-purchase-modal">
+        <div class="modal-content card">
+            <span class="modal-close">&times;</span>
+            <h2 class="form-title">購入情報の編集</h2>
+            <form id="edit-purchase-form">
+                <input type="hidden" id="edit-purchase-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="edit-purchase-date">購入日</label>
+                        <input type="date" id="edit-purchase-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-price">金額 (円)</label>
+                        <input type="number" id="edit-price" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-item-name">購入した商品</label>
+                        <input type="text" id="edit-item-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-storage-location">収納場所</label>
+                        <input type="text" id="edit-storage-location" required>
+                    </div>
+                    <div class="form-group">
+                        <label>精算状況</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="status" value="立て替え中" checked> 立て替え中</label>
+                            <label><input type="radio" name="status" value="精算済み"> 精算済み</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn">登録する</button>
                 </div>
-                <div class="form-group">
-                    <label for="edit-price">金額 (円)</label>
-                    <input type="number" id="edit-price" required>
-                </div>
-                <div class="form-group">
-                    <label for="edit-item-name">購入した商品</label>
-                    <input type="text" id="edit-item-name" required>
-                </div>
-                <div class="form-group">
-                    <label for="edit-storage-location">収納場所</label>
-                    <input type="text" id="edit-storage-location" required>
-                </div>
-            </div>
-            <button type="submit" class="btn">更新する</button>
-        </form>
-    </div>Ï
-</div>
+                <button type="submit" class="btn">更新する</button>
+            </form>
+        </div>Ï
+    </div>
     <script src="assets/js/purchase.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
+
 </html>

@@ -293,7 +293,7 @@ td:last-child {
   margin-right: 5px;
 }
 
-/* --- 練習日記 --- */
+/* --- 乗艇日誌 --- */
 #diary-list .card { position: relative; }
 .diary-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
 .diary-date { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
@@ -419,7 +419,7 @@ td:last-child {
 .signature { margin-top: 40px; text-align: right; }
 .signature p { margin-bottom: 10px; line-height: 1.5; }
 
-/* --- 練習日記のコメントフォーム調整 --- */
+/* --- 乗艇日誌のコメントフォーム調整 --- */
 .comment-form {
   display: flex;
   flex-wrap: wrap; /* スマホ表示で折り返すように */

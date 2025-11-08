@@ -418,3 +418,69 @@ td:last-child {
 /* --- 覚書の署名欄スタイル --- */
 .signature { margin-top: 40px; text-align: right; }
 .signature p { margin-bottom: 10px; line-height: 1.5; }
+
+/* --- 練習日記のコメントフォーム調整 --- */
+.comment-form {
+  display: flex;
+  flex-wrap: wrap; /* スマホ表示で折り返すように */
+  gap: 10px;
+  margin-top: 15px;
+  align-items: flex-end; /* ボタンと入力欄の下端を揃える */
+}
+
+.comment-form-inputs {
+  flex: 1 1 300px; /* 横幅に応じて伸縮する */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comment-form textarea {
+  resize: vertical; /* 縦方向のみリサイズ可 */
+  min-height: 46px; /* 1行のinputと同じくらいの高さに */
+}
+
+.comment-form .btn {
+  flex-shrink: 0; /* ボタンが縮まないように */
+}
+
+/* --- コメント編集・削除ボタンの調整 --- */
+.comment {
+  padding-right: 60px; /* 編集・削除ボタン2つ分のスペースを確保 */
+}
+
+.comment-controls {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 8px;
+}
+
+.comment-edit-btn,
+.comment-delete-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.1rem; /* 少し小さめに調整 */
+  line-height: 1;
+  cursor: pointer;
+  padding: 5px;
+  transition: color 0.3s ease;
+}
+
+.comment-edit-btn:hover {
+  color: var(--secondary-color); /* 青色 */
+}
+
+.comment-delete-btn:hover {
+  color: #dc3545; /* 赤色 */
+}
+
+/* 以前の.comment-delete-btnの指定を上書き・統合 */
+.comment-delete-btn {
+  position: static; /* absoluteを解除 */
+  transform: none; /* transformを解除 */
+  font-size: 1.2rem; /* Font Awesomeに合わせるため少し調整 */
+}

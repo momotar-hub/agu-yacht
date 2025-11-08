@@ -1,9 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzg3MwluD5N3ixXrY6Dgo-U7OkEsND7GCpf5Ksxd1lhbG6X0DbBNqOm3CSk5u7e2RpD/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxtdqo62VBgscrrY2rG8qMuu2X6Kgis-3Q44aKYkvzKEsVdPVvci1qxYE_R179QMVV-/exec';
 
     const form = document.getElementById('diary-form');
     const diaryList = document.getElementById('diary-list');
+    
+    // コメント編集モーダル関連
+    const editCommentModal = document.getElementById('edit-comment-modal');
+    const editCommentForm = document.getElementById('edit-comment-form');
+    const closeEditCommentModalBtn = editCommentModal.querySelector('.modal-close');
     
     let allDiaryEntries = [];
     let currentPage = 1;
@@ -42,42 +47,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
         paginatedEntries.forEach(entry => {
             if (!entry || !entry.id) return;
-            const card = document.createElement('div');
-            card.className = 'card';
-            const diaryDate = formatDate(entry.date);
-            const diaryAuthor = entry.author || '名無し';
-            const diaryWeather = entry.weather || '不明';
-            const diaryTemperature = (entry.temperature !== null && entry.temperature !== undefined && entry.temperature !== '') ? `${entry.temperature}°C` : '不明';
-            const diaryWindDirection = entry.windDirection || '不明';
-            const diaryWindSpeed = (entry.windSpeed !== null && entry.windSpeed !== undefined && entry.windSpeed !== '') ? `${entry.windSpeed} m/s` : '不明';
-            const diaryImpression = (entry.impression || '').replace(/\n/g, '<br>');
+
+            const cardClone = document.getElementById('diary-card-template').content.cloneNode(true);
+            const card = cardClone.querySelector('.card');
+
+            card.querySelector('.delete-btn').dataset.id = entry.id;
+            card.querySelector('.diary-date').textContent = formatDate(entry.date);
+            card.querySelector('.diary-author').textContent = `投稿者: ${entry.author || '名無し'}`;
+            card.querySelector('.weather').textContent = entry.weather || '不明';
+            card.querySelector('.temperature').textContent = (entry.temperature !== null && entry.temperature !== undefined && entry.temperature !== '') ? `${entry.temperature}°C` : '不明';
+            card.querySelector('.windDirection').textContent = entry.windDirection || '不明';
+            card.querySelector('.windSpeed').textContent = (entry.windSpeed !== null && entry.windSpeed !== undefined && entry.windSpeed !== '') ? `${entry.windSpeed} m/s` : '不明';
+            card.querySelector('.impression').innerHTML = (entry.impression || '').replace(/\n/g, '<br>');
+            
+            const commentList = card.querySelector('.comment-list');
             let comments = [];
             if (entry.comments && typeof entry.comments === 'string' && entry.comments.trim().startsWith('[')) {
                 try { comments = JSON.parse(entry.comments); } catch (e) { console.error('コメントのJSONパースに失敗しました:', entry.comments, e); }
             }
-            card.innerHTML = `
-                <button class="action-btn delete-btn" data-id="${entry.id}">削除</button>
-                <div class="diary-header">
-                    <div><div class="diary-date">${diaryDate}</div><div class="diary-author">投稿者: ${diaryAuthor}</div></div>
-                </div>
-                <div class="diary-weather-grid">
-                    <div>天候: <span>${diaryWeather}</span></div><div>気温: <span>${diaryTemperature}</span></div><div>風向き: <span>${diaryWindDirection}</span></div><div>風速: <span>${diaryWindSpeed}</span></div>
-                </div>
-                <div class="diary-body"><p>${diaryImpression}</p></div>
-                <div class="comment-section">
-                    <h4>コメント</h4>
-                    <div class="comment-list">
-                        ${comments.length > 0 ? comments.map((c, index) => `
-                            <div class="comment">
-                                <button class="comment-delete-btn" title="コメントを削除" data-diary-id="${entry.id}" data-comment-index="${index}">&times;</button>
-                                <p>${c.text || ''}</p>
-                                <small>by ${c.author || '名無し'}</small>
-                            </div>`).join('') : '<p>まだコメントはありません。</p>'}
-                    </div>
-                    <form class="comment-form" data-id="${entry.id}">
-                        <input class="form-group" type="text" placeholder="名前" required><input class="form-group" type="text" placeholder="コメントを入力" required><button type="submit" class="btn">送信</button>
-                    </form>
-                </div>`;
+
+            if (comments.length > 0) {
+                commentList.innerHTML = comments.map((c, index) => `
+                    <div class="comment">
+                        <div class="comment-controls">
+                            <button class="comment-edit-btn" title="コメントを編集" data-diary-id="${entry.id}" data-comment-index="${index}">
+                                <i class="fa-solid fa-pencil"></i>
+                            </button>
+                            <button class="comment-delete-btn" title="コメントを削除" data-diary-id="${entry.id}" data-comment-index="${index}">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                        <p>${(c.text || '').replace(/\n/g, '<br>')}</p>
+                        <small>by ${c.author || '名無し'}</small>
+                    </div>`).join('');
+            } else {
+                commentList.innerHTML = '<p>まだコメントはありません。</p>';
+            }
+            card.querySelector('.comment-form').dataset.id = entry.id;
             diaryList.appendChild(card);
         });
         renderPagination();
@@ -139,33 +145,78 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     diaryList.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('delete-btn')) {
-            const id = e.target.dataset.id;
+        const deleteBtn = e.target.closest('.delete-btn');
+        const commentDeleteBtn = e.target.closest('.comment-delete-btn');
+        const commentEditBtn = e.target.closest('.comment-edit-btn');
+
+        if (deleteBtn) {
+            const id = deleteBtn.dataset.id;
             if (confirm('この日記を削除してもよろしいですか？')) {
                 const result = await postData('deleteDiary', { id });
                 if (result.status === 'success') {
-                    // データを再取得して先頭ページに戻る
                     currentPage = 1;
                     fetchAndRender();
-                } else {
-                    alert('削除に失敗しました。');
-                }
+                } else { alert('削除に失敗しました。'); }
             }
         }
-        if (e.target.classList.contains('comment-delete-btn')) {
-            const diaryId = e.target.dataset.diaryId;
-            const commentIndex = e.target.dataset.commentIndex;
+        
+        if (commentDeleteBtn) {
+            const diaryId = commentDeleteBtn.dataset.diaryId;
+            const commentIndex = commentDeleteBtn.dataset.commentIndex;
             if (confirm('このコメントを削除してもよろしいですか？')) {
-                const result = await postData('deleteComment', { diaryId: diaryId, commentIndex: commentIndex });
+                const result = await postData('deleteComment', { diaryId, commentIndex });
                 if (result.status === 'success') {
                     fetchAndRender();
-                } else {
-                    alert('コメントの削除に失敗しました。');
-                }
+                } else { alert('コメントの削除に失敗しました。'); }
+            }
+        }
+
+        if (commentEditBtn) {
+            const diaryId = commentEditBtn.dataset.diaryId;
+            const commentIndex = parseInt(commentEditBtn.dataset.commentIndex, 10);
+            
+            const diary = allDiaryEntries.find(entry => entry.id.toString() === diaryId);
+            const comments = JSON.parse(diary.comments || '[]');
+            const commentToEdit = comments[commentIndex];
+
+            if (commentToEdit) {
+                document.getElementById('edit-diary-id').value = diaryId;
+                document.getElementById('edit-comment-index').value = commentIndex;
+                document.getElementById('edit-comment-author').value = commentToEdit.author;
+                document.getElementById('edit-comment-text').value = commentToEdit.text;
+                editCommentModal.style.display = 'block';
             }
         }
     });
 
+    editCommentForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const updatedCommentData = {
+            diaryId: document.getElementById('edit-diary-id').value,
+            commentIndex: document.getElementById('edit-comment-index').value,
+            comment: {
+                author: document.getElementById('edit-comment-author').value,
+                text: document.getElementById('edit-comment-text').value,
+            }
+        };
+
+        const result = await postData('updateComment', updatedCommentData);
+        if (result.status === 'success') {
+            editCommentModal.style.display = 'none';
+            fetchAndRender();
+        } else {
+            alert('コメントの更新に失敗しました。');
+        }
+    });
+
+    const closeEditModal = () => editCommentModal.style.display = 'none';
+    closeEditCommentModalBtn.addEventListener('click', closeEditModal);
+    window.addEventListener('click', (e) => {
+        if (e.target === editCommentModal) {
+            closeEditModal();
+        }
+    });
+    
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const newEntryData = {
@@ -191,11 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target.classList.contains('comment-form')) {
             e.preventDefault();
             const id = e.target.dataset.id;
-            const authorInput = e.target.querySelector('input:nth-child(1)');
-            const textInput = e.target.querySelector('input:nth-child(2)');
+            const authorInput = e.target.querySelector('input[type="text"]');
+            const textInput = e.target.querySelector('textarea');
             const commentData = { author: authorInput.value, text: textInput.value };
             const result = await postData('addComment', { id, comment: commentData });
             if (result.status === 'success') {
+                authorInput.value = '';
+                textInput.value = '';
                 fetchAndRender();
             } else {
                 alert('コメントの投稿に失敗しました。');

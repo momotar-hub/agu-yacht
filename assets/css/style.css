@@ -429,34 +429,39 @@ td:last-child {
   
   /* ▼▼▼ テーブルのレスポンシブ対応（スマホ表示時） ▼▼▼ */
   
+  /* ▼▼▼ テーブルのレスポンシブ対応（スマホ表示時） ▼▼▼ */
+  
   .table-wrapper {
-      overflow-x: auto; /* 横方向にはみ出したらスクロールバーを表示 */
-  }
+    overflow-x: auto; /* 横方向にはみ出したらスクロールバーを表示 */
+}
 
-  .table-wrapper table {
-      width: auto; /* テーブルの幅をコンテンツに合わせる */
-      min-width: 100%; /* 最低でも親要素の幅を確保 */
-  }
-  
-  /* PC表示では改行しないようにしていたのを、スマホでも維持する */
-  .table-wrapper th, .table-wrapper td {
-      white-space: nowrap;
-  }
-  
-  /* 操作ボタンのセルだけは改行を許可し、ボタンを縦並びにする */
-  .table-wrapper td:last-child {
-      white-space: normal;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      align-items: flex-start;
-  }
+.table-wrapper table {
+    width: auto; /* テーブルの幅をコンテンツに合わせる */
+    min-width: 100%; /* 最低でも親要素の幅を確保 */
+}
 
-  .table-wrapper .action-btn {
-      width: 100%;
-      text-align: center;
-      margin: 0 !important;
-  }
+/* スマホ表示時のテーブルセルのスタイルを統一 */
+.table-wrapper th, 
+.table-wrapper td {
+    white-space: nowrap;
+    padding: 12px 8px;
+    font-size: 0.9rem; /* ← すべてのセルに同じフォントサイズを適用 */
+}
+
+/* 操作ボタンのセルだけは改行を許可し、ボタンを縦並びにする */
+.table-wrapper td:last-child {
+    white-space: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+}
+
+.table-wrapper .action-btn {
+    width: 100%;
+    text-align: center;
+    margin: 0 !important;
+}
 
   /* ▲▲▲ テーブルのレスポンシブ対応ここまで ▲▲▲ */
 }

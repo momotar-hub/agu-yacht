@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${repair.discoverer}</td>
                 <td><span class="${repair.completionDate ? '' : 'text-muted'}">${formatDate(repair.completionDate) || '未完了'}</span></td>
                 <td>${repair.repairer || '-'}</td>
-                <td>${repair.remarks || ''}</td>
+                <td>${(repair.remarks || '').replace(/\n/g, '<br>')}</td>
                 <td>
                     <button class="action-btn edit-btn" data-id="${repair.id}">編集</button>
                     ${!repair.completionDate ? `<button class="action-btn complete-btn" data-id="${repair.id}">完了</button>` : ''}

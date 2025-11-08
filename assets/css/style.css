@@ -217,7 +217,7 @@ body {
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
-  min-width: 0;
+  min-width: 0; /* ← 日付入力欄のはみ出し防止 */
 }
 .form-group input:focus, .form-group textarea:focus {
   outline: none;
@@ -261,7 +261,7 @@ th, td {
   padding: 15px;
   text-align: left;
   border-bottom: 1px solid var(--border-color);
-  white-space: nowrap; /* PC表示ではセル内テキストを改行させない */
+  white-space: nowrap;
 }
 thead {
   background-color: var(--light-gray);
@@ -274,7 +274,7 @@ tbody tr:hover {
   background-color: #eef8ff;
 }
 td:last-child {
-  white-space: normal; /* PC表示でも操作ボタンのセルだけは改行を許可 */
+  white-space: normal;
 }
 .action-btn {
   padding: 6px 12px;
@@ -293,46 +293,18 @@ td:last-child {
   margin-right: 5px;
 }
 
-/* --- 乗艇日誌 --- */
-#diary-list .card {
-  position: relative;
-}
-.diary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 15px;
-  margin-bottom: 15px;
-}
+/* --- 練習日記 --- */
+#diary-list .card { position: relative; }
+.diary-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
 .diary-date { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
 .diary-author { color: #6c757d; }
-.diary-weather-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 15px;
-  background-color: var(--light-gray);
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-}
+.diary-weather-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 15px; background-color: var(--light-gray); padding: 15px; border-radius: 8px; margin-bottom: 15px; }
 .diary-weather-grid div { font-size: 0.95rem; }
 .diary-weather-grid span { font-weight: bold; }
 .diary-body p { white-space: pre-wrap; }
 #diary-list .delete-btn { position: absolute; top: 20px; right: 20px; }
-.comment-section {
-  margin-top: 25px;
-  border-top: 1px dashed var(--border-color);
-  padding-top: 25px;
-}
-.comment {
-  position: relative;
-  background-color: var(--light-gray);
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  padding-right: 30px;
-}
+.comment-section { margin-top: 25px; border-top: 1px dashed var(--border-color); padding-top: 25px; }
+.comment { position: relative; background-color: var(--light-gray); padding: 12px; border-radius: 8px; margin-bottom: 10px; padding-right: 30px; }
 .comment p { margin: 0; }
 .comment small { color: #6c757d; }
 .comment-form { display: flex; gap: 10px; margin-top: 15px; }
@@ -340,73 +312,21 @@ td:last-child {
 .comment-form .btn { padding: 8px 20px; font-size: 0.9rem; }
 
 /* --- フッター --- */
-.footer {
-  background-color: #2c3e50;
-  color: #bdc3c7;
-  text-align: center;
-  padding: 30px 0;
-  margin-top: 40px;
-}
+.footer { background-color: #2c3e50; color: #bdc3c7; text-align: center; padding: 30px 0; margin-top: 40px; }
 
 /* --- アニメーション --- */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.card, .feature-card {
-  animation: fadeIn 0.8s ease-out;
-}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.card, .feature-card { animation: fadeIn 0.8s ease-out; }
 
 /* --- モーダル --- */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 2000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.5);
-  animation: fadeIn 0.3s;
-}
-.modal-content {
-  position: relative;
-  margin: 10vh auto;
-  width: 90%;
-  max-width: 600px;
-}
-.modal-close {
-  color: #aaa;
-  position: absolute;
-  top: 15px;
-  right: 25px;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.modal-close:hover,
-.modal-close:focus {
-  color: black;
-}
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.5); animation: fadeIn 0.3s; }
+.modal-content { position: relative; margin: 10vh auto; width: 90%; max-width: 600px; }
+.modal-close { color: #aaa; position: absolute; top: 15px; right: 25px; font-size: 28px; font-weight: bold; cursor: pointer; }
+.modal-close:hover, .modal-close:focus { color: black; }
 
 /* --- ハンバーガーメニュー --- */
-.hamburger-menu {
-  display: none;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 10px;
-  z-index: 1001;
-}
-.hamburger-menu span {
-  display: block;
-  width: 25px;
-  height: 3px;
-  background-color: var(--primary-color);
-  margin: 5px 0;
-  transition: all 0.3s ease-in-out;
-}
+.hamburger-menu { display: none; background: none; border: none; cursor: pointer; padding: 10px; z-index: 1001; }
+.hamburger-menu span { display: block; width: 25px; height: 3px; background-color: var(--primary-color); margin: 5px 0; transition: all 0.3s ease-in-out; }
 
 /* --- レスポンシブデザイン --- */
 @media (max-width: 768px) {
@@ -428,203 +348,65 @@ td:last-child {
   .card { padding: 20px; }
   
   /* ▼▼▼ テーブルのレスポンシブ対応（スマホ表示時） ▼▼▼ */
-  
-  /* ▼▼▼ テーブルのレスポンシブ対応（スマホ表示時） ▼▼▼ */
-  
   .table-wrapper {
-    overflow-x: auto; /* 横方向にはみ出したらスクロールバーを表示 */
-}
-
-.table-wrapper table {
-    width: auto; /* テーブルの幅をコンテンツに合わせる */
-    min-width: 100%; /* 最低でも親要素の幅を確保 */
-}
-
-/* スマホ表示時のテーブルセルのスタイルを統一 */
-.table-wrapper th, 
-.table-wrapper td {
-    white-space: nowrap;
-    padding: 12px 8px;
-    font-size: 0.9rem; /* ← すべてのセルに同じフォントサイズを適用 */
-}
-
-/* 操作ボタンのセルだけは改行を許可し、ボタンを縦並びにする */
-.table-wrapper td:last-child {
-    white-space: normal;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    align-items: flex-start;
-}
-
-.table-wrapper .action-btn {
-    width: 100%;
-    text-align: center;
-    margin: 0 !important;
-}
-
+      overflow-x: auto;
+  }
+  .table-wrapper table {
+      width: auto;
+      min-width: 100%;
+  }
+  .table-wrapper th, 
+  .table-wrapper td {
+      white-space: nowrap;
+      padding: 12px 8px;
+      font-size: 0.9rem;
+  }
+  .table-wrapper td:last-child {
+      white-space: normal;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: flex-start;
+  }
+  .table-wrapper .action-btn {
+      width: 100%;
+      text-align: center;
+      margin: 0 !important;
+  }
   /* ▲▲▲ テーブルのレスポンシブ対応ここまで ▲▲▲ */
 }
 
 /* --- Googleカレンダーのレスポンシブ対応 --- */
-.calendar-wrapper {
-  position: relative;
-  overflow: hidden;
-  padding-top: 75%;
-}
-.calendar-wrapper iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
+.calendar-wrapper { position: relative; overflow: hidden; padding-top: 75%; }
+.calendar-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
 
 /* --- トップページの背景写真設定 --- */
-#management-section {
-  position: relative;
-  background-image: url('../images/sailing-background.jpeg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  z-index: 1;
-}
-#management-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(248, 249, 250, 0.85); 
-  z-index: -1;
-}
-#management-section .section-title,
-#management-section .section-description {
-  color: var(--primary-color);
-}
+#management-section { position: relative; background-image: url('../images/sailing-background.jpeg'); background-size: cover; background-position: center; background-attachment: fixed; z-index: 1; }
+#management-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(248, 249, 250, 0.85); z-index: -1; }
+#management-section .section-title, #management-section .section-description { color: var(--primary-color); }
 
 /* --- ページネーション --- */
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin-top: 40px;
-}
-.page-btn {
-  background-color: var(--white);
-  color: var(--primary-color);
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  width: 40px;
-  height: 40px;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.page-btn:hover {
-  background-color: var(--light-gray);
-  border-color: var(--secondary-color);
-}
-.page-btn.active {
-  background-color: var(--primary-color);
-  color: var(--white);
-  border-color: var(--primary-color);
-}
+.pagination { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 40px; }
+.page-btn { background-color: var(--white); color: var(--primary-color); border: 2px solid var(--border-color); border-radius: 8px; width: 40px; height: 40px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease; }
+.page-btn:hover { background-color: var(--light-gray); border-color: var(--secondary-color); }
+.page-btn.active { background-color: var(--primary-color); color: var(--white); border-color: var(--primary-color); }
 
 /* --- コメント削除ボタン --- */
-.comment-delete-btn {
-  position: absolute;
-  top: 50%;
-  right: 8px;
-  left: auto;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: #ccc;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 5px;
-  transition: color 0.3s ease;
-}
-.comment-delete-btn:hover {
-  color: #dc3545;
-}
+.comment-delete-btn { position: absolute; top: 50%; right: 8px; left: auto; transform: translateY(-50%); background: none; border: none; color: #ccc; font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 5px; transition: color 0.3s ease; }
+.comment-delete-btn:hover { color: #dc3545; }
 
 /* --- アコーディオン (活動の手引きページ) --- */
-.accordion-item {
-  background-color: var(--white);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  margin-bottom: 15px;
-  overflow: hidden;
-}
-
-.accordion-header {
-  width: 100%;
-  background-color: var(--white);
-  border: none;
-  padding: 20px;
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: var(--primary-color);
-  text-align: left;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.accordion-header:hover {
-  background-color: var(--light-gray);
-}
-
-.accordion-icon {
-  display: inline-block;
-  width: 15px;
-  height: 15px;
-  border-right: 3px solid var(--secondary-color);
-  border-bottom: 3px solid var(--secondary-color);
-  transform: rotate(45deg);
-  transition: transform 0.3s ease-in-out;
-}
-
-.accordion-item.active .accordion-icon {
-  transform: rotate(-135deg); /* 上向き矢印に */
-}
-
-.accordion-content {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.4s ease-in-out;
-}
-
-.accordion-body {
-  padding: 0 25px 25px 25px;
-}
-.accordion-body h4, .accordion-body h5 {
-  margin-top: 20px;
-  margin-bottom: 10px;
-  color: var(--primary-color);
-}
-.accordion-body p, .accordion-body li {
-  line-height: 1.8;
-}
-.accordion-body ol {
-  padding-left: 20px;
-}
+.accordion-item { background-color: var(--white); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
+.accordion-header { width: 100%; background-color: var(--white); border: none; padding: 20px; font-size: 1.3rem; font-weight: 700; color: var(--primary-color); text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.accordion-header:hover { background-color: var(--light-gray); }
+.accordion-icon { display: inline-block; width: 15px; height: 15px; border-right: 3px solid var(--secondary-color); border-bottom: 3px solid var(--secondary-color); transform: rotate(45deg); transition: transform 0.3s ease-in-out; }
+.accordion-item.active .accordion-icon { transform: rotate(-135deg); }
+.accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-in-out; }
+.accordion-body { padding: 0 25px 25px 25px; }
+.accordion-body h4, .accordion-body h5 { margin-top: 20px; margin-bottom: 10px; color: var(--primary-color); }
+.accordion-body p, .accordion-body li { line-height: 1.8; }
+.accordion-body ol { padding-left: 20px; }
 
 /* --- 覚書の署名欄スタイル --- */
-.signature {
-  margin-top: 40px;
-  text-align: right;
-}
-
-.signature p {
-  margin-bottom: 10px;
-  line-height: 1.5;
-}
+.signature { margin-top: 40px; text-align: right; }
+.signature p { margin-bottom: 10px; line-height: 1.5; }

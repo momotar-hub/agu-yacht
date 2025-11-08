@@ -217,7 +217,7 @@ body {
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.3s, box-shadow 0.3s;
-  min-width: 0; /* ← 日付入力欄のはみ出し防止 */
+  min-width: 0; /* 日付入力欄のはみ出し防止 */
 }
 .form-group input:focus, .form-group textarea:focus {
   outline: none;
@@ -360,6 +360,9 @@ td:last-child {
       white-space: nowrap;
       padding: 12px 8px;
       font-size: 0.9rem;
+  }
+  .table-wrapper td:nth-child(7) { /* 修理管理テーブルの7番目のセル（備考欄） */
+      white-space: normal;
   }
   .table-wrapper td:last-child {
       white-space: normal;

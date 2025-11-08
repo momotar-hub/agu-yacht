@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8jnxXOtKlNyLOWXxcpePBaJVDlKt6NU_a63rOrsszLTTboHSzOlJ60WtilFyVaHGD/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrlBtL8kqaFh1ooTGseh4fx6iW1JISVFwQGyTMo3u5lao_OYxagmWzQMcWj2ZjUVOU/exec';
 
     const form = document.getElementById('purchase-form');
     const tableBody = document.querySelector('#purchase-table tbody');
@@ -115,11 +115,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } else { alert('ステータスの更新に失敗しました。'); }
         } else if (target.classList.contains('edit-btn')) {
             const itemToEdit = purchases.find(p => p.id.toString() === id);
+            
             document.getElementById('edit-purchase-id').value = itemToEdit.id;
             document.getElementById('edit-purchase-date').value = formatDate(itemToEdit.date);
             document.getElementById('edit-price').value = itemToEdit.price;
             document.getElementById('edit-item-name').value = itemToEdit.name;
             document.getElementById('edit-storage-location').value = itemToEdit.location;
+
             editModal.style.display = 'block';
         } else if (target.classList.contains('delete-btn')) {
             if (confirm('このデータを削除してもよろしいですか？')) {
@@ -132,14 +134,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+        const itemToUpdate = purchases.find(p => p.id.toString() === document.getElementById('edit-purchase-id').value);
+        
         const updatedData = {
             id: document.getElementById('edit-purchase-id').value,
             date: document.getElementById('edit-purchase-date').value,
             price: document.getElementById('edit-price').value,
             name: document.getElementById('edit-item-name').value,
             location: document.getElementById('edit-storage-location').value,
+            status: itemToUpdate.status || '立て替え中' // ★ 既存のステータスを維持
         };
+        
         const result = await postData('updatePurchase', updatedData);
+
         if (result.status === 'success') {
             editModal.style.display = 'none';
             fetchAndRender();

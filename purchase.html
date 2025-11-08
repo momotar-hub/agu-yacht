@@ -19,7 +19,7 @@
             <a href="index.html" class="header-logo">AGU Sailing Club</a>
             <nav class="header-nav">
                 <ul>
-                    <li><a href="diary.html">乗艇日誌</a></li>
+                    <li><a href="diary.html">練習日記</a></li>
                     <li><a href="repair.html">修理部品管理</a></li>
                     <li><a href="purchase.html" class="active">購入品管理</a></li>
                     <li><a href="calendar.html">カレンダー</a></li>
@@ -53,7 +53,7 @@
                                 <input type="date" id="purchase-date" required>
                             </div>
                             <div class="form-group">
-                                <label for="price">金額</label>
+                                <label for="price">金額 (円)</label>
                                 <input type="number" id="price" placeholder="例: 3000" required>
                             </div>
                             <div class="form-group">
@@ -65,6 +65,15 @@
                                 <input type="text" id="storage-location" placeholder="例: 部室の棚A" required>
                             </div>
                         </div>
+                        <!-- ▼▼▼ 新規登録フォームに精算状況を追加 ▼▼▼ -->
+                        <div class="form-group">
+                            <label>精算状況</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="status" value="立て替え中" checked> 立て替え中</label>
+                                <label><input type="radio" name="status" value="精算済み"> 精算済み</label>
+                            </div>
+                        </div>
+                        <!-- ▲▲▲ ここまで ▲▲▲ -->
                         <button type="submit" class="btn">登録する</button>
                     </form>
                 </div>
@@ -76,10 +85,12 @@
                             <thead>
                                 <tr>
                                     <th>購入日</th>
-                                    <th>金額</th>
+                                    <th>金額 (円)</th>
                                     <th>商品名</th>
                                     <th>収納場所</th>
-                                    
+                                    <!-- ▼▼▼ テーブルヘッダーに精算状況を追加 ▼▼▼ -->
+                                    <th>精算状況</th>
+                                    <!-- ▲▲▲ ここまで ▲▲▲ -->
                                     <th>操作</th>
                                 </tr>
                             </thead>
@@ -98,6 +109,8 @@
             <p>&copy; 2023 Aoyama Gakuin University Sailing Club. All Rights Reserved.</p>
         </div>
     </footer>
+
+    <!-- ▼▼▼ 編集モーダルをシンプルに修正 ▼▼▼ -->
     <div class="modal" id="edit-purchase-modal">
         <div class="modal-content card">
             <span class="modal-close">&times;</span>
@@ -110,7 +123,7 @@
                         <input type="date" id="edit-purchase-date" required>
                     </div>
                     <div class="form-group">
-                        <label for="edit-price">金額</label>
+                        <label for="edit-price">金額 (円)</label>
                         <input type="number" id="edit-price" required>
                     </div>
                     <div class="form-group">
@@ -122,17 +135,13 @@
                         <input type="text" id="edit-storage-location" required>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label>精算状況</label>
-                    <div class="radio-group">
-                        <label><input type="radio" name="edit-status" value="立て替え中"> 立て替え中</label>
-                        <label><input type="radio" name="edit-status" value="精算済み"> 精算済み</label>
-                    </div>
-                </div>
+                <!-- 編集モーダルからはステータス変更機能を削除 -->
                 <button type="submit" class="btn">更新する</button>
             </form>
-        </div>Ï
+        </div>
     </div>
+    <!-- ▲▲▲ ここまで ▲▲▲ -->
+    
     <script src="assets/js/purchase.js"></script>
     <script src="assets/js/main.js"></script>
 </body>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <script src="assets/js/auth.js"></script>
@@ -7,19 +8,22 @@
     <title>修理部品管理 - AGU Sailing Club</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&family=Noto+Sans+JP:wght@400;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
 </head>
+
 <body>
     <header class="header">
         <div class="container">
             <a href="index.html" class="header-logo">AGU Sailing Club</a>
             <nav class="header-nav">
                 <ul>
+                    <li><a href="diary.html">乗艇日誌</a></li>
                     <li><a href="repair.html" class="active">修理部品管理</a></li>
                     <li><a href="purchase.html">購入品管理</a></li>
-                    <li><a href="diary.html">乗艇日誌</a></li>
                     <li><a href="calendar.html">カレンダー</a></li>
+                    <li><a href="manual.html">活動の手引き</a></li>
                 </ul>
             </nav>
             <button class="hamburger-menu" id="hamburger-menu">
@@ -61,7 +65,17 @@
                                 <input type="text" id="discoverer" placeholder="例: 青山 太郎" required>
                             </div>
                         </div>
+                        
+                        <!-- ▼▼▼ 備考欄の入力フォームを追加 ▼▼▼ -->
+                        <div class="form-group">
+                            <label for="remarks">備考</label>
+                            <textarea id="remarks" rows="3" placeholder="部品の発注状況や、修理の進捗などを記入"></textarea>
+                        </div>
+                        <!-- ▲▲▲ ここまで ▲▲▲ -->
+
+                        <!-- ▼▼▼ ボタンを1つに修正 ▼▼▼ -->
                         <button type="submit" class="btn">登録する</button>
+                        <!-- ▲▲▲ ここまで ▲▲▲ -->
                     </form>
                 </div>
 
@@ -77,6 +91,9 @@
                                     <th>発見者</th>
                                     <th>完了日</th>
                                     <th>担当者</th>
+                                    <!-- ▼▼▼ 備考欄のヘッダーを追加 ▼▼▼ -->
+                                    <th>備考</th>
+                                    <!-- ▲▲▲ ここまで ▲▲▲ -->
                                     <th>操作</th>
                                 </tr>
                             </thead>
@@ -97,35 +114,45 @@
     </footer>
     <script src="assets/js/repair.js"></script>
     <script src="assets/js/main.js"></script>
+    
     <!-- === 編集モーダルここから === -->
-<div class="modal" id="edit-repair-modal">
-    <div class="modal-content card">
-        <span class="modal-close">&times;</span>
-        <h2 class="form-title">修理情報の編集</h2>
-        <form id="edit-repair-form">
-            <input type="hidden" id="edit-repair-id">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="edit-discovery-date">発見日</label>
-                    <input type="date" id="edit-discovery-date" required>
+    <div class="modal" id="edit-repair-modal">
+        <div class="modal-content card">
+            <span class="modal-close">&times;</span>
+            <h2 class="form-title">修理情報の編集</h2>
+            <form id="edit-repair-form">
+                <input type="hidden" id="edit-repair-id">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="edit-discovery-date">発見日</label>
+                        <input type="date" id="edit-discovery-date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-ship-number">船の番号</label>
+                        <input type="text" id="edit-ship-number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-location">修理が必要な場所</label>
+                        <input type="text" id="edit-location" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-discoverer">発見者</label>
+                        <input type="text" id="edit-discoverer" required>
+                    </div>
                 </div>
+                
+                <!-- ▼▼▼ 編集モーダルに備考欄を追加 ▼▼▼ -->
                 <div class="form-group">
-                    <label for="edit-ship-number">船の番号</label>
-                    <input type="text" id="edit-ship-number" required>
+                    <label for="edit-remarks">備考</label>
+                    <textarea id="edit-remarks" rows="3"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="edit-location">修理が必要な場所</label>
-                    <input type="text" id="edit-location" required>
-                </div>
-                <div class="form-group">
-                    <label for="edit-discoverer">発見者</label>
-                    <input type="text" id="edit-discoverer" required>
-                </div>
-            </div>
-            <button type="submit" class="btn">更新する</button>
-        </form>
+                <!-- ▲▲▲ ここまで ▲▲▲ -->
+
+                <button type="submit" class="btn">更新する</button>
+            </form>
+        </div>
     </div>
-</div>
-<!-- === 編集モーダルここまで === -->
+    <!-- === 編集モーダルここまで === -->
 </body>
+
 </html>

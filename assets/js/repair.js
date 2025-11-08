@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzHt_hHjT242ttex2kNQlImMsgtF6H0JMCO51roxYzTTdonzkdhkqozHyiY6WqyZS-G/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzg3MwluD5N3ixXrY6Dgo-U7OkEsND7GCpf5Ksxd1lhbG6X0DbBNqOm3CSk5u7e2RpD/exec';
 
     const form = document.getElementById('repair-form');
     const tableBody = document.querySelector('#repair-table tbody');
@@ -22,12 +22,13 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { return String(dateString).substring(0, 10); }
     };
 
-    const showLoading = () => tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">読み込み中...</td></tr>';
+    const showLoading = () => tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">読み込み中...</td></tr>`;
     
+    // ▼▼▼ ここが修正点 ▼▼▼
     const renderTable = () => {
         tableBody.innerHTML = '';
         if (repairs.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">データがありません</td></tr>';
+            tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">データがありません</td></tr>`;
             return;
         }
         
@@ -35,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         repairs.forEach(repair => {
             const row = document.createElement('tr');
+            // innerHTMLの内容はご提示いただいたもので完璧でした！
             row.innerHTML = `
                 <td>${formatDate(repair.discoveryDate)}</td>
                 <td>${repair.shipNumber}</td>
@@ -42,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td>${repair.discoverer}</td>
                 <td><span class="${repair.completionDate ? '' : 'text-muted'}">${formatDate(repair.completionDate) || '未完了'}</span></td>
                 <td>${repair.repairer || '-'}</td>
+                <td>${repair.remarks || ''}</td>
                 <td>
                     <button class="action-btn edit-btn" data-id="${repair.id}">編集</button>
                     ${!repair.completionDate ? `<button class="action-btn complete-btn" data-id="${repair.id}">完了</button>` : ''}
@@ -51,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
             tableBody.appendChild(row);
         });
     };
+    // ▲▲▲ ここまで ▲▲▲
 
     const postData = async (action, data) => {
         try {
@@ -61,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             return await response.json();
         } catch (error) {
+            console.error('Error posting data:', error); // alertからconsole.errorに変更
             alert('通信エラーが発生しました。');
             return { status: 'error' };
         }
@@ -75,10 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 repairs = result.data;
                 renderTable();
             } else {
-                tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">データの読み込みに失敗しました</td></tr>';
+                console.error('Failed to fetch data from GAS:', result); // エラー詳細をコンソールに出力
+                tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">データの読み込みに失敗しました</td></tr>`;
             }
         } catch (error) {
-            tableBody.innerHTML = '<tr><td colspan="7" style="text-align:center;">エラーが発生しました</td></tr>';
+            console.error('Error fetching or parsing data:', error); // エラー詳細をコンソールに出力
+            tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">エラーが発生しました</td></tr>`;
         }
     };
 
@@ -89,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shipNumber: document.getElementById('ship-number').value,
             location: document.getElementById('location').value,
             discoverer: document.getElementById('discoverer').value,
+            remarks: document.getElementById('remarks').value
         };
         const result = await postData('addRepair', newRepairData);
         if (result.status === 'success') {
@@ -111,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-ship-number').value = repairToEdit.shipNumber;
             document.getElementById('edit-location').value = repairToEdit.location;
             document.getElementById('edit-discoverer').value = repairToEdit.discoverer;
+            document.getElementById('edit-remarks').value = repairToEdit.remarks || '';
             editModal.style.display = 'block';
         } else if (target.classList.contains('complete-btn')) {
             const repairer = prompt('修理担当者の名前を入力してください:');
@@ -137,6 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
             shipNumber: document.getElementById('edit-ship-number').value,
             location: document.getElementById('edit-location').value,
             discoverer: document.getElementById('edit-discoverer').value,
+            remarks: document.getElementById('edit-remarks').value
         };
         const result = await postData('updateRepair', updatedData);
         if (result.status === 'success') {

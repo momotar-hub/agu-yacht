@@ -549,3 +549,77 @@ td:last-child {
 .comment-delete-btn:hover {
   color: #dc3545;
 }
+
+/* --- アコーディオン (活動の手引きページ) --- */
+.accordion-item {
+  background-color: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 15px;
+  overflow: hidden;
+}
+
+.accordion-header {
+  width: 100%;
+  background-color: var(--white);
+  border: none;
+  padding: 20px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.accordion-header:hover {
+  background-color: var(--light-gray);
+}
+
+.accordion-icon {
+  display: inline-block;
+  width: 15px;
+  height: 15px;
+  border-right: 3px solid var(--secondary-color);
+  border-bottom: 3px solid var(--secondary-color);
+  transform: rotate(45deg);
+  transition: transform 0.3s ease-in-out;
+}
+
+.accordion-item.active .accordion-icon {
+  transform: rotate(-135deg); /* 上向き矢印に */
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease-in-out;
+}
+
+.accordion-body {
+  padding: 0 25px 25px 25px;
+}
+.accordion-body h4, .accordion-body h5 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: var(--primary-color);
+}
+.accordion-body p, .accordion-body li {
+  line-height: 1.8;
+}
+.accordion-body ol {
+  padding-left: 20px;
+}
+
+/* --- 覚書の署名欄スタイル --- */
+.signature {
+  margin-top: 40px;
+  text-align: right;
+}
+
+.signature p {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}

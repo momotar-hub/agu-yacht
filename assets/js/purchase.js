@@ -1,6 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzrlBtL8kqaFh1ooTGseh4fx6iW1JISVFwQGyTMo3u5lao_OYxagmWzQMcWj2ZjUVOU/exec';
+    const GAS_URL = 'ここにあなたの最新のGASウェブアプリのURLを貼り付け';
 
     const form = document.getElementById('purchase-form');
     const tableBody = document.querySelector('#purchase-table tbody');
@@ -122,6 +121,9 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-item-name').value = itemToEdit.name;
             document.getElementById('edit-storage-location').value = itemToEdit.location;
 
+            const currentStatus = itemToEdit.status || '立て替え中';
+            document.querySelector(`input[name="edit-status"][value="${currentStatus}"]`).checked = true;
+
             editModal.style.display = 'block';
         } else if (target.classList.contains('delete-btn')) {
             if (confirm('このデータを削除してもよろしいですか？')) {
@@ -134,15 +136,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const itemToUpdate = purchases.find(p => p.id.toString() === document.getElementById('edit-purchase-id').value);
-        
         const updatedData = {
             id: document.getElementById('edit-purchase-id').value,
             date: document.getElementById('edit-purchase-date').value,
             price: document.getElementById('edit-price').value,
             name: document.getElementById('edit-item-name').value,
             location: document.getElementById('edit-storage-location').value,
-            status: itemToUpdate.status || '立て替え中' // ★ 既存のステータスを維持
+            status: document.querySelector('input[name="edit-status"]:checked').value
         };
         
         const result = await postData('updatePurchase', updatedData);

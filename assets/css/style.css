@@ -488,8 +488,8 @@ td:last-child {
 /* --- 購入品管理のステータスボタン --- */
 .radio-group {
   display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* 画面が狭くなったら自動で折り返す */
+  gap: 10px 20px; /* 縦の隙間10px, 横の隙間20px */
   align-items: center;
 }
 .radio-group label {
@@ -497,14 +497,6 @@ td:last-child {
   align-items: center;
   gap: 5px;
   cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .radio-group {
-      flex-direction: column; /* 縦並びに変更 */
-      align-items: flex-start; /* 左揃えにする */
-      gap: 10px; /* 縦の間隔を調整 */
-  }
 }
 
 .status-btn {

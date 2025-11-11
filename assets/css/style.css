@@ -518,3 +518,21 @@ td:last-child {
   background-color: #e9f7ef;
   color: #28a745; /* 緑 */
 }
+
+/* --- 活動の手引きページのマニュアル情報スタイル --- */
+.manual-info {
+  background-color: var(--light-gray);
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+.manual-info p {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.accordion-body hr {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 30px 0;
+}

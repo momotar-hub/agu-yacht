@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtZDbENfTisuKK0asfmc0kXBVI97r6L2ShowEr8dS1Tf2JPz557uU4FvDtjYqZ5wAy/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwj35Wy9n9yayF1Tahndio9UzwyWfk9w-OUoWT8Y3J8crtzSjMws02RQdJ6rH0TZcuL/exec';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');

@@ -1,14 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwqMxR_kGkLN-57dsv-2lEkfsrbPQScGlu8r41s7TIeV0lDo_oVcB_f43EUhNZOwin_/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtZDbENfTisuKK0asfmc0kXBVI97r6L2ShowEr8dS1Tf2JPz557uU4FvDtjYqZ5wAy/exec';
 
-    // ID名を maintenance に変更
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
     const editModal = document.getElementById('edit-maintenance-modal');
     const editForm = document.getElementById('edit-maintenance-form');
     const closeModalBtn = editModal.querySelector('.modal-close');
-    let maintenances = []; // 変数名も変更
+    let maintenances = [];
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -25,7 +24,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const showLoading = () => maintenanceList.innerHTML = '<p style="text-align:center;">読み込み中...</p>';
 
-    // renderTableからrenderListに変更し、カードUIを生成
     const renderList = () => {
         maintenanceList.innerHTML = '';
         if (maintenances.length === 0) {
@@ -37,7 +35,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         maintenances.forEach(item => {
             const card = document.createElement('div');
-            card.className = 'card maintenance-card'; // CSSクラス名は maintenance-card のまま流用
+            // ★ CSSクラス名を 'maintenance-card' に統一
+            card.className = 'card maintenance-card'; 
             const isCompleted = item.completionDate && item.completionDate !== '';
 
             card.innerHTML = `
@@ -59,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="status-section">
                         <strong>状況:</strong>
                         <span class="status-tag ${isCompleted ? 'completed' : 'pending'}">
-                            ${isCompleted ? `完了 (${formatDate(item.completionDate)} / ${item.maintenanceer})` : '対応中'}
+                            ${isCompleted ? `完了 (${formatDate(item.completionDate)} / ${item.repairer})` : '対応中'}
                         </span>
                     </div>
                 </div>
@@ -91,8 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchAndRender = async () => {
         showLoading();
         try {
-            // アクション名を getmaintenances のままにする (GAS側を変更しないため)
-            const response = await fetch(`${GAS_URL}?action=getmaintenances`);
+            // ★ アクション名を 'getRepairs' に修正
+            const response = await fetch(`${GAS_URL}?action=getRepairs`);
             const result = await response.json();
             if (result.status === 'success') {
                 maintenances = result.data;
@@ -118,8 +117,8 @@ document.addEventListener('DOMContentLoaded', () => {
             cost: document.getElementById('cost').value,
             photoUrl: document.getElementById('photoUrl').value,
         };
-        // アクション名は addmaintenance のまま
-        const result = await postData('addmaintenance', newItemData);
+        // ★ アクション名を 'addRepair' に修正
+        const result = await postData('addRepair', newItemData);
         if (result.status === 'success') {
             form.reset();
             fetchAndRender();
@@ -146,18 +145,18 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-photoUrl').value = itemToEdit.photoUrl || '';
             editModal.style.display = 'block';
         } else if (target.classList.contains('complete-btn')) {
-            const maintenanceer = prompt('完了担当者の名前を入力してください:');
-            if (maintenanceer && maintenanceer.trim() !== '') {
+            const repairer = prompt('完了担当者の名前を入力してください:');
+            if (repairer && repairer.trim() !== '') {
                 const completionDate = new Date().toISOString().split('T')[0];
-                // アクション名は completemaintenance のまま
-                const result = await postData('completemaintenance', { id, maintenanceer, completionDate });
+                // ★ アクション名を 'completeRepair' に修正
+                const result = await postData('completeRepair', { id, repairer, completionDate });
                 if(result.status === 'success') fetchAndRender();
                 else alert('更新に失敗しました。');
             }
         } else if (target.classList.contains('delete-btn')) {
             if (confirm('この記録を削除してもよろしいですか？')) {
-                // アクション名は deletemaintenance のまま
-                const result = await postData('deletemaintenance', { id });
+                // ★ アクション名を 'deleteRepair' に修正
+                const result = await postData('deleteRepair', { id });
                 if(result.status === 'success') fetchAndRender();
                 else alert('削除に失敗しました。');
             }
@@ -176,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
             cost: document.getElementById('edit-cost').value,
             photoUrl: document.getElementById('edit-photoUrl').value,
         };
-        // アクション名は updatemaintenance のまま
-        const result = await postData('updatemaintenance', updatedData);
+        // ★ アクション名を 'updateRepair' に修正
+        const result = await postData('updateRepair', updatedData);
         if (result.status === 'success') {
             editModal.style.display = 'none';
             fetchAndRender();

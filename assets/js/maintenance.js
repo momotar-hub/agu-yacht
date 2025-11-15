@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwtZDbENfTisuKK0asfmc0kXBVI97r6L2ShowEr8dS1Tf2JPz557uU4FvDtjYqZ5wAy/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwKPT70YEJxginJCkXwqPR2GR8Zl4tviai4mbSOHIbAYSCyQn3PVdgkfgPV9MBCaG8/exec';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
@@ -35,16 +35,17 @@ document.addEventListener('DOMContentLoaded', () => {
         
         maintenances.forEach(item => {
             const card = document.createElement('div');
-            // ★ CSSクラス名を 'maintenance-card' に統一
-            card.className = 'card maintenance-card'; 
+            // ★★★ CSSクラス名を 'repair-card' に修正 ★★★
+            card.className = 'card repair-card'; 
             const isCompleted = item.completionDate && item.completionDate !== '';
 
+            // ★★★ HTML構造内のクラス名も 'repair-card' に統一 ★★★
             card.innerHTML = `
-                <div class="maintenance-card-header ${isCompleted ? 'completed' : 'pending'}">
+                <div class="repair-card-header ${isCompleted ? 'completed' : 'pending'}">
                     <h3>${item.location}</h3>
-                    <div class="maintenance-card-ship">船番号: ${item.shipNumber}</div>
+                    <div class="repair-card-ship">船番号: ${item.shipNumber}</div>
                 </div>
-                <div class="maintenance-card-body">
+                <div class="repair-card-body">
                     <div class="info-grid">
                         <div><strong>発見/作業日:</strong> ${formatDate(item.discoveryDate)}</div>
                         <div><strong>発見/作業者:</strong> ${item.discoverer}</div>
@@ -62,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </span>
                     </div>
                 </div>
-                <div class="maintenance-card-footer">
+                <div class="repair-card-footer">
                     ${!isCompleted ? `<button class="action-btn complete-btn" data-id="${item.id}">完了にする</button>` : ''}
                     <button class="action-btn edit-btn" data-id="${item.id}">編集</button>
                     <button class="action-btn delete-btn" data-id="${item.id}">削除</button>
@@ -90,7 +91,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fetchAndRender = async () => {
         showLoading();
         try {
-            // ★ アクション名を 'getRepairs' に修正
             const response = await fetch(`${GAS_URL}?action=getRepairs`);
             const result = await response.json();
             if (result.status === 'success') {
@@ -117,7 +117,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cost: document.getElementById('cost').value,
             photoUrl: document.getElementById('photoUrl').value,
         };
-        // ★ アクション名を 'addRepair' に修正
         const result = await postData('addRepair', newItemData);
         if (result.status === 'success') {
             form.reset();
@@ -148,14 +147,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const repairer = prompt('完了担当者の名前を入力してください:');
             if (repairer && repairer.trim() !== '') {
                 const completionDate = new Date().toISOString().split('T')[0];
-                // ★ アクション名を 'completeRepair' に修正
                 const result = await postData('completeRepair', { id, repairer, completionDate });
                 if(result.status === 'success') fetchAndRender();
                 else alert('更新に失敗しました。');
             }
         } else if (target.classList.contains('delete-btn')) {
             if (confirm('この記録を削除してもよろしいですか？')) {
-                // ★ アクション名を 'deleteRepair' に修正
                 const result = await postData('deleteRepair', { id });
                 if(result.status === 'success') fetchAndRender();
                 else alert('削除に失敗しました。');
@@ -175,7 +172,6 @@ document.addEventListener('DOMContentLoaded', () => {
             cost: document.getElementById('edit-cost').value,
             photoUrl: document.getElementById('edit-photoUrl').value,
         };
-        // ★ アクション名を 'updateRepair' に修正
         const result = await postData('updateRepair', updatedData);
         if (result.status === 'success') {
             editModal.style.display = 'none';

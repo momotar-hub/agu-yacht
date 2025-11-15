@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwj35Wy9n9yayF1Tahndio9UzwyWfk9w-OUoWT8Y3J8crtzSjMws02RQdJ6rH0TZcuL/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyAic_V0ThLCLrnnCkCxgRl2xPwpRqwB8QY0vz3jXSyy2qSqbtKWVoeB8u4RoGXhQe5/exec';
 
     const form = document.getElementById('purchase-form');
     const tableBody = document.querySelector('#purchase-table tbody');

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxXGL_vGiZca-D5Z7tAyv_kcgtCIYenNr6m5OSKOnQHKSpLi87V1QysBKLqbcy6egTb/exec';
+    // ★★★ GASを再デプロイして、新しいURLに必ず更新してください ★★★
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwlmQFVhSQ7DfE1k8IJcORiDwAiBLewghc-7NZBdgZg20GQP1htqWNL9FwNBufSYsA8/exec';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
@@ -36,10 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
         maintenances.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card repair-card';
+            
             const isCompleted = item.status === '完了';
+            const isBilled = item.billingStatus === '請求済';
+            const statusClass = (isCompleted && !isBilled) ? 'alert' : (isCompleted ? 'completed' : 'pending');
 
             card.innerHTML = `
-                <div class="repair-card-header ${isCompleted ? 'completed' : 'pending'}">
+                <div class="repair-card-header ${statusClass}">
                     <h3>${item.location}</h3>
                     <div class="repair-card-ship">船番号: ${item.shipNumber}</div>
                 </div>
@@ -60,9 +63,14 @@ document.addEventListener('DOMContentLoaded', () => {
                             ${isCompleted ? `完了 (完了日: ${formatDate(item.completionDate) || '未入力'} / 担当: ${item.repairer || '未入力'})` : '対応中'}
                         </span>
                     </div>
+                    <div class="status-section">
+                        <strong>請求:</strong>
+                        <span class="status-tag ${statusClass}">
+                            ${item.billingStatus || '未請求'}
+                        </span>
+                    </div>
                 </div>
                 <div class="repair-card-footer">
-                    ${!isCompleted ? `<button class="action-btn complete-btn" data-id="${item.id}">完了にする</button>` : ''}
                     <button class="action-btn edit-btn" data-id="${item.id}">編集 / 状況変更</button>
                     <button class="action-btn delete-btn" data-id="${item.id}">削除</button>
                 </div>
@@ -113,7 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
             location: document.getElementById('location').value,
             cost: document.getElementById('cost').value,
             photoUrl: document.getElementById('photoUrl').value,
-            remarks: document.getElementById('remarks').value
+            remarks: document.getElementById('remarks').value,
+            billingStatus: document.querySelector('input[name="billingStatus"]:checked').value
         };
         const result = await postData('addRepair', newItemData);
         if (result.status === 'success') {
@@ -132,8 +141,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (target.classList.contains('edit-btn')) {
             const itemToEdit = maintenances.find(r => r.id.toString() === id);
             document.getElementById('edit-maintenance-id').value = itemToEdit.id;
+            
             const currentStatus = itemToEdit.status || '対応中';
             document.querySelector(`input[name="edit-status"][value="${currentStatus}"]`).checked = true;
+            
+            const currentBillingStatus = itemToEdit.billingStatus || '未請求';
+            document.querySelector(`input[name="edit-billingStatus"][value="${currentBillingStatus}"]`).checked = true;
+
             document.getElementById('edit-discovery-date').value = formatDate(itemToEdit.discoveryDate);
             document.getElementById('edit-discoverer').value = itemToEdit.discoverer;
             document.getElementById('edit-ship-number').value = itemToEdit.shipNumber;
@@ -144,31 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-photoUrl').value = itemToEdit.photoUrl || '';
             document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
             editModal.style.display = 'block';
-        } else if (target.classList.contains('complete-btn')) {
-            // ▼▼▼ このブロックが抜けていました ▼▼▼
-            const itemToComplete = maintenances.find(r => r.id.toString() === id);
-            if (!itemToComplete) return;
-
-            const repairer = prompt('完了担当者の名前を入力してください:');
-            if (repairer && repairer.trim() !== '') {
-                const completionDate = new Date().toISOString().split('T')[0];
-                
-                // GASに送信するデータを準備
-                const updatedData = {
-                    ...itemToComplete, // 既存のデータをすべてコピー
-                    status: '完了',
-                    completionDate: completionDate,
-                    repairer: repairer
-                };
-                
-                const result = await postData('updateRepair', updatedData);
-                if(result.status === 'success') {
-                    fetchAndRender();
-                } else {
-                    alert('更新に失敗しました。');
-                }
-            }
-            // ▲▲▲ ここまで ▲▲▲
         } else if (target.classList.contains('delete-btn')) {
             if (confirm('この記録を削除してもよろしいですか？')) {
                 const result = await postData('deleteRepair', { id });
@@ -201,7 +190,8 @@ document.addEventListener('DOMContentLoaded', () => {
             repairer: repairer,
             cost: document.getElementById('edit-cost').value,
             photoUrl: document.getElementById('edit-photoUrl').value,
-            remarks: document.getElementById('edit-remarks').value
+            remarks: document.getElementById('edit-remarks').value,
+            billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value
         };
         const result = await postData('updateRepair', updatedData);
         if (result.status === 'success') {

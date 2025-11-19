@@ -171,3 +171,18 @@ body.home #management-section .section-title, body.home #management-section .sec
     box-sizing: border-box;
   }
 }
+
+/* --- メンテナンス管理の警告色（完了かつ未請求） --- */
+.repair-card-header.alert {
+  background-color: #fff0f1; /* 薄い赤背景 */
+  border-bottom-color: #ffc9c9;
+}
+.repair-card-header.alert h3 {
+  color: #dc3545; /* 赤文字 */
+}
+.status-tag.alert {
+  background-color: #dc3545;
+  color: #fff; /* 赤背景に白文字 */
+  font-weight: bold;
+  box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3); /* 少し強調 */
+}

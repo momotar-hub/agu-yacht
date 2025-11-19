@@ -55,6 +55,13 @@
                             <div class="form-group"><label for="location">作業箇所</label><input type="text" id="location" placeholder="例: ティラー, 船外機オイル交換" required></div>
                             <div class="form-group"><label for="cost">費用 (円)</label><input type="number" id="cost" placeholder="例: 5000"></div>
                             <div class="form-group"><label for="photoUrl">写真リンク</label><input type="url" id="photoUrl" placeholder="Googleドライブの共有リンクなど"></div>
+                            <div class="form-group">
+                                <label>請求状況</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="billingStatus" value="未請求" checked> 未請求</label>
+                                    <label><input type="radio" name="billingStatus" value="請求済"> 請求済</label>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="remarks">備考</label>
@@ -102,6 +109,13 @@
                     <div class="form-group"><label for="edit-repairer">完了担当者</label><input type="text" id="edit-repairer"></div>
                     <div class="form-group"><label for="edit-cost">費用 (円)</label><input type="number" id="edit-cost"></div>
                     <div class="form-group"><label for="edit-photoUrl">写真リンク</label><input type="url" id="edit-photoUrl"></div>
+                    <div class="form-group">
+                        <label>請求状況</label>
+                        <div class="radio-group">
+                            <label><input type="radio" name="edit-billingStatus" value="未請求"> 未請求</label>
+                            <label><input type="radio" name="edit-billingStatus" value="請求済"> 請求済</label>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="edit-remarks">備考</label>

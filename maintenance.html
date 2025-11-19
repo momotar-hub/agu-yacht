@@ -40,16 +40,19 @@
             </div>
         </section>
 
+        <!-- ▼▼▼ ここから修正 ▼▼▼ -->
+        <!-- 不要なid="management-section"を削除 -->
         <section class="section">
+        <!-- ▲▲▲ ここまで ▲▲▲ -->
             <div class="container">
                 <div class="form-container card">
                     <h2 class="form-title">新規登録フォーム</h2>
                     <form id="maintenance-form">
                         <div class="form-grid">
-                            <div class="form-group"><label for="discovery-date">発見日/作業日</label><input type="date" id="discovery-date" required></div>
+                            <div class="form-group"><label for="discovery-date">発見日</label><input type="date" id="discovery-date" required></div>
+                            <div class="form-group"><label for="discoverer">発見者</label><input type="text" id="discoverer" placeholder="例: 青山 太郎" required></div>
                             <div class="form-group"><label for="ship-number">船の番号</label><input type="text" id="ship-number" placeholder="例: 4711, KSCレスキュー" required></div>
                             <div class="form-group"><label for="location">作業箇所</label><input type="text" id="location" placeholder="例: ティラー, 船外機オイル交換" required></div>
-                            <div class="form-group"><label for="discoverer">発見者/作業者</label><input type="text" id="discoverer" placeholder="例: 青山 太郎" required></div>
                             <div class="form-group"><label for="cost">費用 (円)</label><input type="number" id="cost" placeholder="例: 5000"></div>
                             <div class="form-group"><label for="photoUrl">写真リンク</label><input type="url" id="photoUrl" placeholder="Googleドライブの共有リンクなど"></div>
                         </div>
@@ -80,11 +83,23 @@
             <h2 class="form-title">メンテナンス情報の編集</h2>
             <form id="edit-maintenance-form">
                 <input type="hidden" id="edit-maintenance-id">
+                <!-- ▼▼▼ 編集モーダルに「状況」ラジオボタンを追加 ▼▼▼ -->
+                <div class="form-group">
+                    <label>状況</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="edit-status" value="対応中"> 対応中</label>
+                        <label><input type="radio" name="edit-status" value="完了"> 完了</label>
+                    </div>
+                </div>
+                <hr class="form-divider">
+                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <div class="form-grid">
-                    <div class="form-group"><label for="edit-discovery-date">発見日/作業日</label><input type="date" id="edit-discovery-date" required></div>
+                    <div class="form-group"><label for="edit-discovery-date">発見日</label><input type="date" id="edit-discovery-date" required></div>
+                    <div class="form-group"><label for="edit-discoverer">発見者</label><input type="text" id="edit-discoverer" required></div>
                     <div class="form-group"><label for="edit-ship-number">船の番号</label><input type="text" id="edit-ship-number" required></div>
                     <div class="form-group"><label for="edit-location">作業箇所</label><input type="text" id="edit-location" required></div>
-                    <div class="form-group"><label for="edit-discoverer">発見者/作業者</label><input type="text" id="edit-discoverer" required></div>
+                    <div class="form-group"><label for="edit-completion-date">完了日</label><input type="date" id="edit-completion-date"></div>
+                    <div class="form-group"><label for="edit-repairer">完了担当者</label><input type="text" id="edit-repairer"></div>
                     <div class="form-group"><label for="edit-cost">費用 (円)</label><input type="number" id="edit-cost"></div>
                     <div class="form-group"><label for="edit-photoUrl">写真リンク</label><input type="url" id="edit-photoUrl"></div>
                 </div>

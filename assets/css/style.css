@@ -57,6 +57,7 @@ body { font-family: 'Noto Sans JP', sans-serif; color: var(--text-color); backgr
 .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1rem; transition: border-color 0.3s, box-shadow 0.3s; min-width: 0; }
 .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 91, 187, 0.2); }
 .form-group textarea { resize: vertical; min-height: 120px; }
+.form-divider { border: none; border-top: 1px solid var(--border-color); margin: 25px 0; }
 
 /* --- ボタン --- */
 .btn { display: inline-block; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: var(--white); padding: 14px 32px; border: none; border-radius: 50px; cursor: pointer; font-size: 1rem; font-weight: 700; text-decoration: none; transition: transform 0.2s ease, box-shadow 0.3s ease; box-shadow: 0 4px 10px rgba(0, 91, 187, 0.3); }
@@ -103,35 +104,6 @@ body { font-family: 'Noto Sans JP', sans-serif; color: var(--text-color); backgr
 .comment-edit-btn:hover { color: var(--secondary-color); }
 .comment-delete-btn { position: static; transform: none; font-size: 1.2rem; }
 .comment-delete-btn:hover { color: #dc3545; }
-
-/* --- メンテナンス管理カードスタイル --- */
-.maintenance-card { padding: 0; overflow: hidden; }
-.maintenance-card-header { padding: 15px 20px; background-color: var(--light-gray); border-bottom: 1px solid var(--border-color); }
-.maintenance-card-header h3 { font-size: 1.5rem; margin: 0; color: var(--primary-color); }
-.maintenance-card-ship { color: #6c757d; }
-.maintenance-card-header.pending { background-color: #fffbe6; }
-.maintenance-card-header.completed { background-color: #e9f7ef; }
-.maintenance-card-body { padding: 20px; }
-.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 20px; }
-.info-grid div { background-color: var(--light-gray); padding: 8px 12px; border-radius: 6px; }
-.info-grid i { font-size: 0.8em; margin-left: 5px; }
-.remarks-section { border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px; }
-.remarks-section p { white-space: pre-wrap; }
-.status-section { margin-top: 20px; font-weight: 700; }
-.status-tag { display: inline-block; padding: 4px 12px; border-radius: 50px; margin-left: 10px; font-size: 0.9rem; }
-.status-tag.pending { background-color: #fff0f1; color: #dc3545; }
-.status-tag.completed { background-color: #e9f7ef; color: #28a745; }
-.maintenance-card-footer { background-color: var(--light-gray); padding: 15px 20px; text-align: right; display: flex; justify-content: flex-end; gap: 10px; }
-.maintenance-card-footer .action-btn { width: auto; margin: 0 !important; }
-
-/* --- 購入品管理のステータスボタン --- */
-.radio-group { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; }
-.radio-group label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
-.status-btn { width: 100px; padding: 6px 10px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease; }
-.status-btn.unpaid { background-color: #fff0f1; color: #dc3545; }
-.status-btn.paid { background-color: #e9f7ef; color: #28a745; }
-
-/* --- アコーディオン & その他 --- */
 .accordion-item { background-color: var(--white); border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
 .accordion-header { width: 100%; background-color: var(--white); border: none; padding: 20px; font-size: 1.3rem; font-weight: 700; color: var(--primary-color); text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
 .accordion-header:hover { background-color: var(--light-gray); }
@@ -146,9 +118,34 @@ body { font-family: 'Noto Sans JP', sans-serif; color: var(--text-color); backgr
 .signature p { margin-bottom: 10px; line-height: 1.5; }
 .calendar-wrapper { position: relative; overflow: hidden; padding-top: 75%; }
 .calendar-wrapper iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-#management-section { position: relative; background-image: url('../images/sailing-background.jpeg'); background-size: cover; background-position: center; background-attachment: fixed; z-index: 1; }
-#management-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(248, 249, 250, 0.85); z-index: -1; }
-#management-section .section-title, #management-section .section-description { color: var(--primary-color); }
+.radio-group { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; }
+.radio-group label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+.status-btn { width: 100px; padding: 6px 10px; border-radius: 50px; border: none; font-weight: 700; cursor: pointer; transition: background-color 0.3s ease; }
+.status-btn.unpaid { background-color: #fff0f1; color: #dc3545; }
+.status-btn.paid { background-color: #e9f7ef; color: #28a745; }
+.repair-card { padding: 0; overflow: hidden; }
+.repair-card-header { padding: 15px 20px; background-color: var(--light-gray); border-bottom: 1px solid var(--border-color); }
+.repair-card-header h3 { font-size: 1.5rem; margin: 0; color: var(--primary-color); }
+.repair-card-ship { color: #6c757d; }
+.repair-card-header.pending { background-color: #fffbe6; }
+.repair-card-header.completed { background-color: #e9f7ef; }
+.repair-card-body { padding: 20px; }
+.info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.info-grid div { background-color: var(--light-gray); padding: 8px 12px; border-radius: 6px; }
+.info-grid i { font-size: 0.8em; margin-left: 5px; }
+.remarks-section { border-top: 1px dashed var(--border-color); padding-top: 15px; margin-top: 15px; }
+.remarks-section p { white-space: pre-wrap; }
+.status-section { margin-top: 20px; font-weight: 700; }
+.status-tag { display: inline-block; padding: 4px 12px; border-radius: 50px; margin-left: 10px; font-size: 0.9rem; }
+.status-tag.pending { background-color: #fff0f1; color: #dc3545; }
+.status-tag.completed { background-color: #e9f7ef; color: #28a745; }
+.repair-card-footer { background-color: var(--light-gray); padding: 15px 20px; text-align: right; display: flex; justify-content: flex-end; gap: 10px; }
+.repair-card-footer .action-btn { width: auto; margin: 0 !important; }
+
+/* ▼▼▼ トップページの背景写真設定（homeクラスを持つbody内のみに限定）▼▼▼ */
+body.home #management-section { position: relative; background-image: url('../images/sailing-background.jpeg'); background-size: cover; background-position: center; background-attachment: fixed; z-index: 1; }
+body.home #management-section::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(248, 249, 250, 0.85); z-index: -1; }
+body.home #management-section .section-title, body.home #management-section .section-description { color: var(--primary-color); }
 
 /* --- レスポンシブデザイン --- */
 @media (max-width: 768px) {

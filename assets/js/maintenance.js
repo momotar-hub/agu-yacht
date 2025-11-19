@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ★★★ Remember to update this with your new deployment URL ★★★
+    // あなたの最新のGASウェブアプリURL
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbxXGL_vGiZca-D5Z7tAyv_kcgtCIYenNr6m5OSKOnQHKSpLi87V1QysBKLqbcy6egTb/exec';
 
     const form = document.getElementById('maintenance-form');
@@ -62,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="repair-card-footer">
+                    ${!isCompleted ? `<button class="action-btn complete-btn" data-id="${item.id}">完了にする</button>` : ''}
                     <button class="action-btn edit-btn" data-id="${item.id}">編集 / 状況変更</button>
                     <button class="action-btn delete-btn" data-id="${item.id}">削除</button>
                 </div>
@@ -143,6 +144,31 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-photoUrl').value = itemToEdit.photoUrl || '';
             document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
             editModal.style.display = 'block';
+        } else if (target.classList.contains('complete-btn')) {
+            // ▼▼▼ このブロックが抜けていました ▼▼▼
+            const itemToComplete = maintenances.find(r => r.id.toString() === id);
+            if (!itemToComplete) return;
+
+            const repairer = prompt('完了担当者の名前を入力してください:');
+            if (repairer && repairer.trim() !== '') {
+                const completionDate = new Date().toISOString().split('T')[0];
+                
+                // GASに送信するデータを準備
+                const updatedData = {
+                    ...itemToComplete, // 既存のデータをすべてコピー
+                    status: '完了',
+                    completionDate: completionDate,
+                    repairer: repairer
+                };
+                
+                const result = await postData('updateRepair', updatedData);
+                if(result.status === 'success') {
+                    fetchAndRender();
+                } else {
+                    alert('更新に失敗しました。');
+                }
+            }
+            // ▲▲▲ ここまで ▲▲▲
         } else if (target.classList.contains('delete-btn')) {
             if (confirm('この記録を削除してもよろしいですか？')) {
                 const result = await postData('deleteRepair', { id });

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ★★★ GASを再デプロイして、新しいURLに必ず更新してください ★★★
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwoWZ2Lv-uiuwIpv50SxPGpXuI3ITw2ZFNot25-3gbTN2beq14JIQxOaqtfGQeoaPgR/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxTuD-UVWcFTozhMmFtbsAjlWODQqLheWP31i6K2O5VpvRsB4zDUH4cepvdbaSusMYU/exec';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
@@ -112,24 +112,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    form.addEventListener('submit', async (e) => {
+    // ★★★ 新規登録フォームの送信処理 (ファイルアップロード対応) ★★★
+    form.addEventListener('submit', (e) => {
         e.preventDefault();
-        const newItemData = {
-            discoveryDate: document.getElementById('discovery-date').value,
-            discoverer: document.getElementById('discoverer').value,
-            shipNumber: document.getElementById('ship-number').value,
-            location: document.getElementById('location').value,
-            cost: document.getElementById('cost').value,
-            photoUrl: document.getElementById('photoUrl').value,
-            remarks: document.getElementById('remarks').value,
-            billingStatus: document.querySelector('input[name="billingStatus"]:checked').value
+        const submitButton = form.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = '登録中...';
+
+        const fileInput = document.getElementById('photoFile');
+        const file = fileInput.files[0];
+
+        const processSubmit = async (fileData = null, fileName = null) => {
+            const newItemData = {
+                discoveryDate: document.getElementById('discovery-date').value,
+                discoverer: document.getElementById('discoverer').value,
+                shipNumber: document.getElementById('ship-number').value,
+                location: document.getElementById('location').value,
+                cost: document.getElementById('cost').value,
+                remarks: document.getElementById('remarks').value,
+                billingStatus: document.querySelector('input[name="billingStatus"]:checked').value,
+                fileData: fileData,
+                fileName: fileName
+            };
+            const result = await postData('addRepair', newItemData);
+            if (result.status === 'success') {
+                form.reset();
+                fetchAndRender();
+            } else { 
+                alert('登録に失敗しました。');
+            }
+            submitButton.disabled = false;
+            submitButton.textContent = '登録する';
         };
-        const result = await postData('addRepair', newItemData);
-        if (result.status === 'success') {
-            form.reset();
-            fetchAndRender();
-        } else { 
-            alert('登録に失敗しました。');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                processSubmit(e.target.result, file.name);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            processSubmit();
         }
     });
 
@@ -155,7 +178,16 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-completion-date').value = formatDate(itemToEdit.completionDate);
             document.getElementById('edit-repairer').value = itemToEdit.repairer || '';
             document.getElementById('edit-cost').value = itemToEdit.cost || '';
-            document.getElementById('edit-photoUrl').value = itemToEdit.photoUrl || '';
+            
+            const currentPhotoLink = document.getElementById('edit-current-photo-link');
+            if(itemToEdit.photoUrl) {
+                currentPhotoLink.href = itemToEdit.photoUrl;
+                currentPhotoLink.textContent = '現在の写真を見る';
+            } else {
+                currentPhotoLink.href = '#';
+                currentPhotoLink.textContent = 'なし';
+            }
+            
             document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
             editModal.style.display = 'block';
         } else if (target.classList.contains('delete-btn')) {
@@ -167,38 +199,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    editForm.addEventListener('submit', async (e) => {
+    // ★★★ 編集フォームの送信処理 (ファイルアップロード対応) ★★★
+    editForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        
-        let completionDate = document.getElementById('edit-completion-date').value;
-        let repairer = document.getElementById('edit-repairer').value;
-        const status = document.querySelector('input[name="edit-status"]:checked').value;
-        
-        if (status === '対応中') {
-            completionDate = '';
-            repairer = '';
-        }
+        const submitButton = editForm.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        submitButton.textContent = '更新中...';
 
-        const updatedData = {
-            id: document.getElementById('edit-maintenance-id').value,
-            status: status,
-            discoveryDate: document.getElementById('edit-discovery-date').value,
-            discoverer: document.getElementById('edit-discoverer').value,
-            shipNumber: document.getElementById('edit-ship-number').value,
-            location: document.getElementById('edit-location').value,
-            completionDate: completionDate,
-            repairer: repairer,
-            cost: document.getElementById('edit-cost').value,
-            photoUrl: document.getElementById('edit-photoUrl').value,
-            remarks: document.getElementById('edit-remarks').value,
-            billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value
+        const fileInput = document.getElementById('edit-photoFile');
+        const file = fileInput.files[0];
+
+        const processUpdate = async (fileData = null, fileName = null) => {
+            let completionDate = document.getElementById('edit-completion-date').value;
+            let repairer = document.getElementById('edit-repairer').value;
+            const status = document.querySelector('input[name="edit-status"]:checked').value;
+            
+            if (status === '対応中') {
+                completionDate = '';
+                repairer = '';
+            }
+
+            const itemToUpdate = maintenances.find(r => r.id.toString() === document.getElementById('edit-maintenance-id').value);
+            
+            const updatedData = {
+                id: document.getElementById('edit-maintenance-id').value,
+                status: status,
+                discoveryDate: document.getElementById('edit-discovery-date').value,
+                discoverer: document.getElementById('edit-discoverer').value,
+                shipNumber: document.getElementById('edit-ship-number').value,
+                location: document.getElementById('edit-location').value,
+                completionDate: completionDate,
+                repairer: repairer,
+                cost: document.getElementById('edit-cost').value,
+                remarks: document.getElementById('edit-remarks').value,
+                billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value,
+                photoUrl: file ? '' : itemToUpdate.photoUrl, // 新しいファイルがなければ既存のURLを維持
+                fileData: fileData,
+                fileName: fileName
+            };
+
+            const result = await postData('updateRepair', updatedData);
+            if (result.status === 'success') {
+                editModal.style.display = 'none';
+                fetchAndRender();
+            } else {
+                alert('更新に失敗しました。');
+            }
+            submitButton.disabled = false;
+            submitButton.textContent = '更新する';
         };
-        const result = await postData('updateRepair', updatedData);
-        if (result.status === 'success') {
-            editModal.style.display = 'none';
-            fetchAndRender();
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                processUpdate(e.target.result, file.name);
+            };
+            reader.readAsDataURL(file);
         } else {
-            alert('更新に失敗しました。');
+            processUpdate();
         }
     });
     

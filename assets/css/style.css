@@ -68,7 +68,7 @@ body { font-family: 'Noto Sans JP', sans-serif; color: var(--text-color); backgr
 .delete-btn { background-color: #dc3545; }
 .action-btn.edit-btn { background-color: #ffc107; }
 
-/* --- 練習日記 & その他 --- */
+/* --- 乗艇日誌 & その他 --- */
 #diary-list .card { position: relative; }
 .diary-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
 .diary-date { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }

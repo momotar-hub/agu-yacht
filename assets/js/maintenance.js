@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ★★★ GASを再デプロイして、新しいURLに必ず更新してください ★★★
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwlmQFVhSQ7DfE1k8IJcORiDwAiBLewghc-7NZBdgZg20GQP1htqWNL9FwNBufSYsA8/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwYPUHHWI0CVQf77phGs8Rad6fTt6I-lnpQM000qlE-uTWt7ekG-iMaO-Z1driorzF-/exec';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');

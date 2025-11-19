@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('diary-form');
     const diaryList = document.getElementById('diary-list');
     
-    // コメント編集モーダル関連
     const editCommentModal = document.getElementById('edit-comment-modal');
     const editCommentForm = document.getElementById('edit-comment-form');
     const closeEditCommentModalBtn = editCommentModal.querySelector('.modal-close');
@@ -39,7 +38,19 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        allDiaryEntries.sort((a, b) => (new Date(b.date) - new Date(a.date)));
+        // ▼▼▼ ここが並び替えの修正点です ▼▼▼
+        allDiaryEntries.sort((a, b) => {
+            const dateA = a.date ? new Date(a.date).getTime() : 0;
+            const dateB = b.date ? new Date(b.date).getTime() : 0;
+            
+            if (dateB !== dateA) {
+                return dateB - dateA; // 日付が違う場合は、新しい方を優先
+            }
+            
+            // 日付が同じ場合は、ID（タイムスタンプ）で比較する
+            return b.id - a.id;
+        });
+        // ▲▲▲ ここまで ▲▲▲
 
         const startIndex = (currentPage - 1) * entriesPerPage;
         const endIndex = startIndex + entriesPerPage;

@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxTuD-UVWcFTozhMmFtbsAjlWODQqLheWP31i6K2O5VpvRsB4zDUH4cepvdbaSusMYU/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzLtuI9EEI_B15tdrGLzRL5JiLX58bqCRUds13ZsmmyP-LDnnGfzhilU8hhwi_jRTFs/exec';
 
     const form = document.getElementById('diary-form');
     const diaryList = document.getElementById('diary-list');

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ★★★ GASを再デプロイして、新しいURLに必ず更新してください ★★★
+    // あなたの最新のGASウェブアプリURL
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW3mhgdxBspBZoMDm2I91V3ZuHhLDDnvgzHwBXNKf7Huh0t9uCodqxvYKDknhxRnea/exec';
 
     const form = document.getElementById('maintenance-form');
@@ -31,7 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         
-        maintenances.sort((a, b) => new Date(b.discoveryDate) - new Date(a.discoveryDate));
+        maintenances.sort((a, b) => {
+            const dateA = a.discoveryDate ? new Date(a.discoveryDate).getTime() : 0;
+            const dateB = b.discoveryDate ? new Date(b.discoveryDate).getTime() : 0;
+            if (dateB !== dateA) { return dateB - dateA; }
+            return b.id - a.id;
+        });
         
         maintenances.forEach(item => {
             const card = document.createElement('div');
@@ -71,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div class="repair-card-footer">
+                    ${!isCompleted ? `<button class="action-btn complete-btn" data-id="${item.id}">完了にする</button>` : ''}
                     <button class="action-btn edit-btn" data-id="${item.id}">編集 / 状況変更</button>
                     <button class="action-btn delete-btn" data-id="${item.id}">削除</button>
                 </div>
@@ -112,16 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // ★★★ 新規登録フォームの送信処理 (ファイルアップロード対応) ★★★
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const submitButton = form.querySelector('button[type="submit"]');
         submitButton.disabled = true;
         submitButton.textContent = '登録中...';
-
         const fileInput = document.getElementById('photoFile');
         const file = fileInput.files[0];
-
         const processSubmit = async (fileData = null, fileName = null) => {
             const newItemData = {
                 discoveryDate: document.getElementById('discovery-date').value,
@@ -144,16 +147,11 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.disabled = false;
             submitButton.textContent = '登録する';
         };
-
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                processSubmit(e.target.result, file.name);
-            };
+            reader.onload = (e) => { processSubmit(e.target.result, file.name); };
             reader.readAsDataURL(file);
-        } else {
-            processSubmit();
-        }
+        } else { processSubmit(); }
     });
 
     maintenanceList.addEventListener('click', async (e) => {
@@ -163,14 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
         
         if (target.classList.contains('edit-btn')) {
             const itemToEdit = maintenances.find(r => r.id.toString() === id);
+            if (!itemToEdit) return;
             document.getElementById('edit-maintenance-id').value = itemToEdit.id;
-            
             const currentStatus = itemToEdit.status || '対応中';
             document.querySelector(`input[name="edit-status"][value="${currentStatus}"]`).checked = true;
-            
             const currentBillingStatus = itemToEdit.billingStatus || '未請求';
             document.querySelector(`input[name="edit-billingStatus"][value="${currentBillingStatus}"]`).checked = true;
-
             document.getElementById('edit-discovery-date').value = formatDate(itemToEdit.discoveryDate);
             document.getElementById('edit-discoverer').value = itemToEdit.discoverer;
             document.getElementById('edit-ship-number').value = itemToEdit.shipNumber;
@@ -178,7 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-completion-date').value = formatDate(itemToEdit.completionDate);
             document.getElementById('edit-repairer').value = itemToEdit.repairer || '';
             document.getElementById('edit-cost').value = itemToEdit.cost || '';
-            
             const currentPhotoLink = document.getElementById('edit-current-photo-link');
             if(itemToEdit.photoUrl) {
                 currentPhotoLink.href = itemToEdit.photoUrl;
@@ -187,9 +182,35 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentPhotoLink.href = '#';
                 currentPhotoLink.textContent = 'なし';
             }
-            
             document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
             editModal.style.display = 'block';
+        } else if (target.classList.contains('complete-btn')) {
+            // ▼▼▼ このブロックが抜けていました ▼▼▼
+            const itemToComplete = maintenances.find(r => r.id.toString() === id);
+            if (!itemToComplete) return;
+
+            const repairer = prompt('完了担当者の名前を入力してください:');
+            if (repairer && repairer.trim() !== '') {
+                const completionDate = new Date().toISOString().split('T')[0];
+                
+                const updatedData = {
+                    ...itemToComplete, // 既存のデータをすべてコピー
+                    status: '完了',
+                    completionDate: completionDate,
+                    repairer: repairer
+                };
+                
+                // delete updatedData.fileData; // 不要なデータを削除
+                // delete updatedData.fileName;
+                
+                const result = await postData('updateRepair', updatedData);
+                if(result.status === 'success') {
+                    fetchAndRender();
+                } else {
+                    alert('更新に失敗しました。');
+                }
+            }
+            // ▲▲▲ ここまで ▲▲▲
         } else if (target.classList.contains('delete-btn')) {
             if (confirm('この記録を削除してもよろしいですか？')) {
                 const result = await postData('deleteRepair', { id });
@@ -199,28 +220,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ★★★ 編集フォームの送信処理 (ファイルアップロード対応) ★★★
     editForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const submitButton = editForm.querySelector('button[type="submit"]');
         submitButton.disabled = true;
         submitButton.textContent = '更新中...';
-
         const fileInput = document.getElementById('edit-photoFile');
         const file = fileInput.files[0];
-
         const processUpdate = async (fileData = null, fileName = null) => {
             let completionDate = document.getElementById('edit-completion-date').value;
             let repairer = document.getElementById('edit-repairer').value;
             const status = document.querySelector('input[name="edit-status"]:checked').value;
-            
             if (status === '対応中') {
                 completionDate = '';
                 repairer = '';
             }
-
             const itemToUpdate = maintenances.find(r => r.id.toString() === document.getElementById('edit-maintenance-id').value);
-            
             const updatedData = {
                 id: document.getElementById('edit-maintenance-id').value,
                 status: status,
@@ -233,11 +248,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 cost: document.getElementById('edit-cost').value,
                 remarks: document.getElementById('edit-remarks').value,
                 billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value,
-                photoUrl: file ? '' : itemToUpdate.photoUrl, // 新しいファイルがなければ既存のURLを維持
+                photoUrl: file ? '' : itemToUpdate.photoUrl,
                 fileData: fileData,
                 fileName: fileName
             };
-
             const result = await postData('updateRepair', updatedData);
             if (result.status === 'success') {
                 editModal.style.display = 'none';
@@ -248,16 +262,11 @@ document.addEventListener('DOMContentLoaded', () => {
             submitButton.disabled = false;
             submitButton.textContent = '更新する';
         };
-
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                processUpdate(e.target.result, file.name);
-            };
+            reader.onload = (e) => { processUpdate(e.target.result, file.name); };
             reader.readAsDataURL(file);
-        } else {
-            processUpdate();
-        }
+        } else { processUpdate(); }
     });
     
     const closeModal = () => editModal.style.display = 'none';

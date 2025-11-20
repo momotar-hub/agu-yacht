@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW3mhgdxBspBZoMDm2I91V3ZuHhLDDnvgzHwBXNKf7Huh0t9uCodqxvYKDknhxRnea/exec';
+    // ★★★ GASを再デプロイして、新しいURLに必ず更新してください ★★★
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyc1LABqPFFuRUy3P-THDr_-xV9LvjcUvayqX8i8UPiFwAxx3Hsj2pj11k47IOAQ0eI/exec';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
@@ -8,6 +8,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const editForm = document.getElementById('edit-maintenance-form');
     const closeModalBtn = editModal.querySelector('.modal-close');
     let maintenances = [];
+
+    // ファイルをBase64に変換する非同期関数
+    const toBase64 = file => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -30,20 +38,17 @@ document.addEventListener('DOMContentLoaded', () => {
             maintenanceList.innerHTML = '<p style="text-align:center;">メンテナンス記録はありません。</p>';
             return;
         }
-        maintenances.sort((a, b) => {
-            const dateA = a.discoveryDate ? new Date(a.discoveryDate).getTime() : 0;
-            const dateB = b.discoveryDate ? new Date(b.discoveryDate).getTime() : 0;
-            if (dateB !== dateA) { return dateB - dateA; }
-            return (b.id || 0) - (a.id || 0);
-        });
+        
+        maintenances.sort((a, b) => new Date(b.discoveryDate) - new Date(a.discoveryDate));
+        
         maintenances.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card repair-card';
             const isCompleted = item.status === '完了';
-            const isBilled = item.billingStatus === '請求済';
-            const statusClass = (isCompleted && !isBilled) ? 'alert' : (isCompleted ? 'completed' : 'pending');
+            const billingStatusText = item.billingStatus || '未請求';
+
             card.innerHTML = `
-                <div class="repair-card-header ${statusClass}">
+                <div class="repair-card-header ${isCompleted ? 'completed' : 'pending'}">
                     <h3>${item.location}</h3>
                     <div class="repair-card-ship">船番号: ${item.shipNumber}</div>
                 </div>
@@ -52,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div><strong>発見日:</strong> ${formatDate(item.discoveryDate)}</div>
                         <div><strong>発見者:</strong> ${item.discoverer}</div>
                         <div><strong>費用:</strong> ${item.cost ? Number(item.cost).toLocaleString() + '円' : '未入力'}</div>
+                        <div><strong>請求状況:</strong> ${billingStatusText}</div>
                         <div>
                             <strong>写真:</strong> 
                             ${item.photoUrl ? `<a href="${item.photoUrl}" target="_blank" rel="noopener noreferrer">リンクを開く <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : 'なし'}
@@ -59,20 +65,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     ${item.remarks ? `<div class="remarks-section"><strong>備考:</strong><p>${(item.remarks || '').replace(/\n/g, '<br>')}</p></div>` : ''}
                     <div class="status-section">
-                        <strong>状況:</strong>
+                        <strong>作業状況:</strong>
                         <span class="status-tag ${isCompleted ? 'completed' : 'pending'}">
                             ${isCompleted ? `完了 (完了日: ${formatDate(item.completionDate) || '未入力'} / 担当: ${item.repairer || '未入力'})` : '対応中'}
                         </span>
                     </div>
-                    <div class="status-section">
-                        <strong>請求:</strong>
-                        <span class="status-tag ${statusClass}">
-                            ${item.billingStatus || '未請求'}
-                        </span>
-                    </div>
                 </div>
                 <div class="repair-card-footer">
-                    ${!isCompleted ? `<button class="action-btn complete-btn" data-id="${item.id}">完了にする</button>` : ''}
                     <button class="action-btn edit-btn" data-id="${item.id}">編集 / 状況変更</button>
                     <button class="action-btn delete-btn" data-id="${item.id}">削除</button>
                 </div>
@@ -101,158 +100,131 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${GAS_URL}?action=getRepairs`);
             const result = await response.json();
-            if (result.status === 'success' && Array.isArray(result.data)) {
+            if (result.status === 'success') {
                 maintenances = result.data;
                 renderList();
             } else {
-                console.error("GASから予期しない形式のデータが返されました:", result);
-                maintenanceList.innerHTML = `<p style="text-align:center;">データの読み込みに失敗しました (形式エラー)。</p>`;
+                console.error('Failed to fetch data from GAS:', result);
+                maintenanceList.innerHTML = `<p style="text-align:center;">データの読み込みに失敗しました</p>`;
             }
         } catch (error) {
-            console.error("FetchまたはJSONパースでエラーが発生しました:", error);
-            maintenanceList.innerHTML = `<p style="text-align:center;">エラーが発生しました。開発者ツールのConsoleを確認してください。</p>`;
+            console.error('Error fetching or parsing data:', error);
+            maintenanceList.innerHTML = `<p style="text-align:center;">エラーが発生しました</p>`;
         }
     };
 
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = form.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.textContent = '登録中...';
+        
+        let fileData = null;
+        let fileName = null;
         const fileInput = document.getElementById('photoFile');
-        const file = fileInput.files[0];
-        const processSubmit = async (fileData = null, fileName = null) => {
-            const newItemData = {
-                discoveryDate: document.getElementById('discovery-date').value,
-                discoverer: document.getElementById('discoverer').value,
-                shipNumber: document.getElementById('ship-number').value,
-                location: document.getElementById('location').value,
-                cost: document.getElementById('cost').value,
-                remarks: document.getElementById('remarks').value,
-                billingStatus: document.querySelector('input[name="billingStatus"]:checked').value,
-                fileData: fileData,
-                fileName: fileName
-            };
-            const result = await postData('addRepair', newItemData);
-            if (result.status === 'success') {
-                form.reset();
-                fetchAndRender();
-            } else { alert('登録に失敗しました。'); }
-            submitButton.disabled = false;
-            submitButton.textContent = '登録する';
+        if (fileInput.files.length > 0) {
+            fileData = await toBase64(fileInput.files[0]);
+            fileName = fileInput.files[0].name;
+        }
+
+        const newItemData = {
+            discoveryDate: document.getElementById('discovery-date').value,
+            discoverer: document.getElementById('discoverer').value,
+            shipNumber: document.getElementById('ship-number').value,
+            location: document.getElementById('location').value,
+            cost: document.getElementById('cost').value,
+            remarks: document.getElementById('remarks').value,
+            billingStatus: document.querySelector('input[name="billingStatus"]:checked').value,
+            fileData: fileData,
+            fileName: fileName
         };
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => { processSubmit(e.target.result, file.name); };
-            reader.readAsDataURL(file);
-        } else { processSubmit(); }
+        const result = await postData('addRepair', newItemData);
+        if (result.status === 'success') {
+            form.reset();
+            fetchAndRender();
+        } else { 
+            alert('登録に失敗しました。');
+        }
     });
-    
-    // ▼▼▼ ここを document.body.addEventListener に変更 ▼▼▼
-    document.body.addEventListener('click', async (e) => {
+
+    maintenanceList.addEventListener('click', async (e) => {
         const target = e.target.closest('button');
         if (!target) return;
+        const id = target.dataset.id;
+        
+        if (target.classList.contains('edit-btn')) {
+            const itemToEdit = maintenances.find(r => r.id.toString() === id);
+            document.getElementById('edit-maintenance-id').value = itemToEdit.id;
+            const currentStatus = itemToEdit.status || '対応中';
+            document.querySelector(`input[name="edit-status"][value="${currentStatus}"]`).checked = true;
+            document.getElementById('edit-discovery-date').value = formatDate(itemToEdit.discoveryDate);
+            document.getElementById('edit-discoverer').value = itemToEdit.discoverer;
+            document.getElementById('edit-ship-number').value = itemToEdit.shipNumber;
+            document.getElementById('edit-location').value = itemToEdit.location;
+            document.getElementById('edit-completion-date').value = formatDate(itemToEdit.completionDate);
+            document.getElementById('edit-repairer').value = itemToEdit.repairer || '';
+            document.getElementById('edit-cost').value = itemToEdit.cost || '';
+            const currentBillingStatus = itemToEdit.billingStatus || '未請求';
+            document.querySelector(`input[name="edit-billingStatus"][value="${currentBillingStatus}"]`).checked = true;
+            document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
+            
+            const photoLink = document.getElementById('edit-current-photo-link');
+            if (itemToEdit.photoUrl) {
+                photoLink.href = itemToEdit.photoUrl;
+                photoLink.textContent = '現在の写真を表示';
+                photoLink.style.display = 'inline';
+            } else {
+                photoLink.textContent = 'なし';
+            }
 
-        // クリックされたボタンがメンテナンスリストの中にあるかを確認
-        if (target.closest('#maintenance-list')) {
-            const id = target.dataset.id;
-            if (!id) return;
-
-            if (target.classList.contains('edit-btn')) {
-                const itemToEdit = maintenances.find(r => r.id.toString() === id);
-                if (itemToEdit) {
-                    document.getElementById('edit-maintenance-id').value = itemToEdit.id;
-                    const currentStatus = itemToEdit.status || '対応中';
-                    document.querySelector(`input[name="edit-status"][value="${currentStatus}"]`).checked = true;
-                    const currentBillingStatus = itemToEdit.billingStatus || '未請求';
-                    document.querySelector(`input[name="edit-billingStatus"][value="${currentBillingStatus}"]`).checked = true;
-                    document.getElementById('edit-discovery-date').value = formatDate(itemToEdit.discoveryDate);
-                    document.getElementById('edit-discoverer').value = itemToEdit.discoverer;
-                    document.getElementById('edit-ship-number').value = itemToEdit.shipNumber;
-                    document.getElementById('edit-location').value = itemToEdit.location;
-                    document.getElementById('edit-completion-date').value = formatDate(itemToEdit.completionDate);
-                    document.getElementById('edit-repairer').value = itemToEdit.repairer || '';
-                    document.getElementById('edit-cost').value = itemToEdit.cost || '';
-                    const currentPhotoLink = document.getElementById('edit-current-photo-link');
-                    if(itemToEdit.photoUrl) {
-                        currentPhotoLink.href = itemToEdit.photoUrl;
-                        currentPhotoLink.textContent = '現在の写真を見る';
-                    } else {
-                        currentPhotoLink.href = '#';
-                        currentPhotoLink.textContent = 'なし';
-                    }
-                    document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
-                    editModal.style.display = 'block';
-                }
-            } else if (target.classList.contains('complete-btn')) {
-                const itemToComplete = maintenances.find(r => r.id.toString() === id);
-                if (!itemToComplete) return;
-                const repairer = prompt('完了担当者の名前を入力してください:');
-                if (repairer && repairer.trim() !== '') {
-                    const completionDate = new Date().toISOString().split('T')[0];
-                    const updatedData = { ...itemToComplete, status: '完了', completionDate: completionDate, repairer: repairer };
-                    const result = await postData('updateRepair', updatedData);
-                    if(result.status === 'success') { fetchAndRender(); }
-                    else { alert('更新に失敗しました。'); }
-                }
-            } else if (target.classList.contains('delete-btn')) {
-                if (confirm('この記録を削除してもよろしいですか？')) {
-                    const result = await postData('deleteRepair', { id });
-                    if(result.status === 'success') fetchAndRender();
-                    else alert('削除に失敗しました。');
-                }
+            editModal.style.display = 'block';
+        } else if (target.classList.contains('delete-btn')) {
+            if (confirm('この記録を削除してもよろしいですか？')) {
+                const result = await postData('deleteRepair', { id });
+                if(result.status === 'success') fetchAndRender();
+                else alert('削除に失敗しました。');
             }
         }
     });
-    // ▲▲▲ ここまで ▲▲▲
 
-    editForm.addEventListener('submit', (e) => {
+    editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const submitButton = editForm.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.textContent = '更新中...';
+        
+        let fileData = null;
+        let fileName = null;
         const fileInput = document.getElementById('edit-photoFile');
-        const file = fileInput.files[0];
-        const processUpdate = async (fileData = null, fileName = null) => {
-            let completionDate = document.getElementById('edit-completion-date').value;
-            let repairer = document.getElementById('edit-repairer').value;
-            const status = document.querySelector('input[name="edit-status"]:checked').value;
-            if (status === '対応中') {
-                completionDate = '';
-                repairer = '';
-            }
-            const itemToUpdate = maintenances.find(r => r.id.toString() === document.getElementById('edit-maintenance-id').value);
-            const updatedData = {
-                id: document.getElementById('edit-maintenance-id').value,
-                status: status,
-                discoveryDate: document.getElementById('edit-discovery-date').value,
-                discoverer: document.getElementById('edit-discoverer').value,
-                shipNumber: document.getElementById('edit-ship-number').value,
-                location: document.getElementById('edit-location').value,
-                completionDate: completionDate,
-                repairer: repairer,
-                cost: document.getElementById('edit-cost').value,
-                remarks: document.getElementById('edit-remarks').value,
-                billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value,
-                photoUrl: file ? '' : itemToUpdate.photoUrl,
-                fileData: fileData,
-                fileName: fileName
-            };
-            const result = await postData('updateRepair', updatedData);
-            if (result.status === 'success') {
-                editModal.style.display = 'none';
-                fetchAndRender();
-            } else {
-                alert('更新に失敗しました。');
-            }
-            submitButton.disabled = false;
-            submitButton.textContent = '更新する';
+        if (fileInput.files.length > 0) {
+            fileData = await toBase64(fileInput.files[0]);
+            fileName = fileInput.files[0].name;
+        }
+        
+        let completionDate = document.getElementById('edit-completion-date').value;
+        let repairer = document.getElementById('edit-repairer').value;
+        const status = document.querySelector('input[name="edit-status"]:checked').value;
+        if (status === '対応中') {
+            completionDate = '';
+            repairer = '';
+        }
+
+        const updatedData = {
+            id: document.getElementById('edit-maintenance-id').value,
+            status: status,
+            discoveryDate: document.getElementById('edit-discovery-date').value,
+            discoverer: document.getElementById('edit-discoverer').value,
+            shipNumber: document.getElementById('edit-ship-number').value,
+            location: document.getElementById('edit-location').value,
+            completionDate: completionDate,
+            repairer: repairer,
+            cost: document.getElementById('edit-cost').value,
+            remarks: document.getElementById('edit-remarks').value,
+            billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value,
+            fileData: fileData,
+            fileName: fileName
         };
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => { processUpdate(e.target.result, file.name); };
-            reader.readAsDataURL(file);
-        } else { processUpdate(); }
+        const result = await postData('updateRepair', updatedData);
+        if (result.status === 'success') {
+            editModal.style.display = 'none';
+            fetchAndRender();
+        } else {
+            alert('更新に失敗しました。');
+        }
     });
     
     const closeModal = () => editModal.style.display = 'none';

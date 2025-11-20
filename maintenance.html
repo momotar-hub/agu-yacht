@@ -40,10 +40,7 @@
             </div>
         </section>
 
-        <!-- ▼▼▼ ここから修正 ▼▼▼ -->
-        <!-- 不要なid="management-section"を削除 -->
         <section class="section">
-        <!-- ▲▲▲ ここまで ▲▲▲ -->
             <div class="container">
                 <div class="form-container card">
                     <h2 class="form-title">新規登録フォーム</h2>
@@ -58,17 +55,17 @@
                                 <label for="photoFile">写真ファイルを選択</label>
                                 <input type="file" id="photoFile" accept="image/*">
                             </div>
-                            <div class="form-group">
-                                <label>請求状況</label>
-                                <div class="radio-group">
-                                    <label><input type="radio" name="billingStatus" value="未請求" checked> 未請求</label>
-                                    <label><input type="radio" name="billingStatus" value="請求済"> 請求済</label>
-                                </div>
-                            </div>
                         </div>
                         <div class="form-group">
                             <label for="remarks">備考</label>
                             <textarea id="remarks" rows="3" placeholder="部品の発注状況や、作業の詳細などを記入"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>請求状況</label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="billingStatus" value="未請求" checked> 未請求</label>
+                                <label><input type="radio" name="billingStatus" value="請求済"> 請求済</label>
+                            </div>
                         </div>
                         <button type="submit" class="btn">登録する</button>
                     </form>
@@ -93,7 +90,6 @@
             <h2 class="form-title">メンテナンス情報の編集</h2>
             <form id="edit-maintenance-form">
                 <input type="hidden" id="edit-maintenance-id">
-                <!-- ▼▼▼ 編集モーダルに「状況」ラジオボタンを追加 ▼▼▼ -->
                 <div class="form-group">
                     <label>状況</label>
                     <div class="radio-group">
@@ -102,31 +98,40 @@
                     </div>
                 </div>
                 <hr class="form-divider">
-                <!-- ▲▲▲ ここまで ▲▲▲ -->
                 <div class="form-grid">
                     <div class="form-group"><label for="edit-discovery-date">発見日</label><input type="date" id="edit-discovery-date" required></div>
                     <div class="form-group"><label for="edit-discoverer">発見者</label><input type="text" id="edit-discoverer" required></div>
                     <div class="form-group"><label for="edit-ship-number">船の番号</label><input type="text" id="edit-ship-number" required></div>
                     <div class="form-group"><label for="edit-location">作業箇所</label><input type="text" id="edit-location" required></div>
-                    <div class="form-group"><label for="edit-completion-date">完了日</label><input type="date" id="edit-completion-date"></div>
-                    <div class="form-group"><label for="edit-repairer">完了担当者</label><input type="text" id="edit-repairer"></div>
+                    
+                    <!-- ▼▼▼ 抜けていた2つの入力欄を正しく追加 ▼▼▼ -->
+                    <div class="form-group">
+                        <label for="edit-completion-date">完了日</label>
+                        <input type="date" id="edit-completion-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-repairer">完了担当者</label>
+                        <input type="text" id="edit-repairer">
+                    </div>
+                    <!-- ▲▲▲ ここまで ▲▲▲ -->
+
                     <div class="form-group"><label for="edit-cost">費用 (円)</label><input type="number" id="edit-cost"></div>
                     <div class="form-group">
                         <label for="edit-photoFile">新しい写真で上書き</label>
                         <input type="file" id="edit-photoFile" accept="image/*">
                         <small>現在の写真: <a id="edit-current-photo-link" href="#" target="_blank">なし</a></small>
                     </div>
-                    <div class="form-group">
-                        <label>請求状況</label>
-                        <div class="radio-group">
-                            <label><input type="radio" name="edit-billingStatus" value="未請求"> 未請求</label>
-                            <label><input type="radio" name="edit-billingStatus" value="請求済"> 請求済</label>
-                        </div>
-                    </div>
                 </div>
                 <div class="form-group">
                     <label for="edit-remarks">備考</label>
                     <textarea id="edit-remarks" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>請求状況</label>
+                    <div class="radio-group">
+                        <label><input type="radio" name="edit-billingStatus" value="未請求"> 未請求</label>
+                        <label><input type="radio" name="edit-billingStatus" value="請求済"> 請求済</label>
+                    </div>
                 </div>
                 <button type="submit" class="btn">更新する</button>
             </form>

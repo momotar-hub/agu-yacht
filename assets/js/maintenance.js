@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // あなたの最新のGASウェブアプリURL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbz7CSsD4x53-J4RG7x7TsCCysFx2i84n8EH7MqbNMRPO82yZBJMwLpb-qzL3ZhKsgNy/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwW3mhgdxBspBZoMDm2I91V3ZuHhLDDnvgzHwBXNKf7Huh0t9uCodqxvYKDknhxRnea/exec';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
@@ -30,22 +30,18 @@ document.addEventListener('DOMContentLoaded', () => {
             maintenanceList.innerHTML = '<p style="text-align:center;">メンテナンス記録はありません。</p>';
             return;
         }
-        
         maintenances.sort((a, b) => {
             const dateA = a.discoveryDate ? new Date(a.discoveryDate).getTime() : 0;
             const dateB = b.discoveryDate ? new Date(b.discoveryDate).getTime() : 0;
             if (dateB !== dateA) { return dateB - dateA; }
-            return b.id - a.id;
+            return (b.id || 0) - (a.id || 0);
         });
-        
         maintenances.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card repair-card';
-            
             const isCompleted = item.status === '完了';
             const isBilled = item.billingStatus === '請求済';
             const statusClass = (isCompleted && !isBilled) ? 'alert' : (isCompleted ? 'completed' : 'pending');
-
             card.innerHTML = `
                 <div class="repair-card-header ${statusClass}">
                     <h3>${item.location}</h3>
@@ -105,16 +101,16 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(`${GAS_URL}?action=getRepairs`);
             const result = await response.json();
-            if (result.status === 'success') {
+            if (result.status === 'success' && Array.isArray(result.data)) {
                 maintenances = result.data;
                 renderList();
             } else {
-                console.error('Failed to fetch data from GAS:', result);
-                maintenanceList.innerHTML = `<p style="text-align:center;">データの読み込みに失敗しました</p>`;
+                console.error("GASから予期しない形式のデータが返されました:", result);
+                maintenanceList.innerHTML = `<p style="text-align:center;">データの読み込みに失敗しました (形式エラー)。</p>`;
             }
         } catch (error) {
-            console.error('Error fetching or parsing data:', error);
-            maintenanceList.innerHTML = `<p style="text-align:center;">エラーが発生しました</p>`;
+            console.error("FetchまたはJSONパースでエラーが発生しました:", error);
+            maintenanceList.innerHTML = `<p style="text-align:center;">エラーが発生しました。開発者ツールのConsoleを確認してください。</p>`;
         }
     };
 
@@ -141,9 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (result.status === 'success') {
                 form.reset();
                 fetchAndRender();
-            } else { 
-                alert('登録に失敗しました。');
-            }
+            } else { alert('登録に失敗しました。'); }
             submitButton.disabled = false;
             submitButton.textContent = '登録する';
         };
@@ -153,72 +147,64 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(file);
         } else { processSubmit(); }
     });
-
-    maintenanceList.addEventListener('click', async (e) => {
+    
+    // ▼▼▼ ここを document.body.addEventListener に変更 ▼▼▼
+    document.body.addEventListener('click', async (e) => {
         const target = e.target.closest('button');
         if (!target) return;
-        const id = target.dataset.id;
-        
-        if (target.classList.contains('edit-btn')) {
-            const itemToEdit = maintenances.find(r => r.id.toString() === id);
-            if (!itemToEdit) return;
-            document.getElementById('edit-maintenance-id').value = itemToEdit.id;
-            const currentStatus = itemToEdit.status || '対応中';
-            document.querySelector(`input[name="edit-status"][value="${currentStatus}"]`).checked = true;
-            const currentBillingStatus = itemToEdit.billingStatus || '未請求';
-            document.querySelector(`input[name="edit-billingStatus"][value="${currentBillingStatus}"]`).checked = true;
-            document.getElementById('edit-discovery-date').value = formatDate(itemToEdit.discoveryDate);
-            document.getElementById('edit-discoverer').value = itemToEdit.discoverer;
-            document.getElementById('edit-ship-number').value = itemToEdit.shipNumber;
-            document.getElementById('edit-location').value = itemToEdit.location;
-            document.getElementById('edit-completion-date').value = formatDate(itemToEdit.completionDate);
-            document.getElementById('edit-repairer').value = itemToEdit.repairer || '';
-            document.getElementById('edit-cost').value = itemToEdit.cost || '';
-            const currentPhotoLink = document.getElementById('edit-current-photo-link');
-            if(itemToEdit.photoUrl) {
-                currentPhotoLink.href = itemToEdit.photoUrl;
-                currentPhotoLink.textContent = '現在の写真を見る';
-            } else {
-                currentPhotoLink.href = '#';
-                currentPhotoLink.textContent = 'なし';
-            }
-            document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
-            editModal.style.display = 'block';
-        } else if (target.classList.contains('complete-btn')) {
-            // ▼▼▼ このブロックが抜けていました ▼▼▼
-            const itemToComplete = maintenances.find(r => r.id.toString() === id);
-            if (!itemToComplete) return;
 
-            const repairer = prompt('完了担当者の名前を入力してください:');
-            if (repairer && repairer.trim() !== '') {
-                const completionDate = new Date().toISOString().split('T')[0];
-                
-                const updatedData = {
-                    ...itemToComplete, // 既存のデータをすべてコピー
-                    status: '完了',
-                    completionDate: completionDate,
-                    repairer: repairer
-                };
-                
-                // delete updatedData.fileData; // 不要なデータを削除
-                // delete updatedData.fileName;
-                
-                const result = await postData('updateRepair', updatedData);
-                if(result.status === 'success') {
-                    fetchAndRender();
-                } else {
-                    alert('更新に失敗しました。');
+        // クリックされたボタンがメンテナンスリストの中にあるかを確認
+        if (target.closest('#maintenance-list')) {
+            const id = target.dataset.id;
+            if (!id) return;
+
+            if (target.classList.contains('edit-btn')) {
+                const itemToEdit = maintenances.find(r => r.id.toString() === id);
+                if (itemToEdit) {
+                    document.getElementById('edit-maintenance-id').value = itemToEdit.id;
+                    const currentStatus = itemToEdit.status || '対応中';
+                    document.querySelector(`input[name="edit-status"][value="${currentStatus}"]`).checked = true;
+                    const currentBillingStatus = itemToEdit.billingStatus || '未請求';
+                    document.querySelector(`input[name="edit-billingStatus"][value="${currentBillingStatus}"]`).checked = true;
+                    document.getElementById('edit-discovery-date').value = formatDate(itemToEdit.discoveryDate);
+                    document.getElementById('edit-discoverer').value = itemToEdit.discoverer;
+                    document.getElementById('edit-ship-number').value = itemToEdit.shipNumber;
+                    document.getElementById('edit-location').value = itemToEdit.location;
+                    document.getElementById('edit-completion-date').value = formatDate(itemToEdit.completionDate);
+                    document.getElementById('edit-repairer').value = itemToEdit.repairer || '';
+                    document.getElementById('edit-cost').value = itemToEdit.cost || '';
+                    const currentPhotoLink = document.getElementById('edit-current-photo-link');
+                    if(itemToEdit.photoUrl) {
+                        currentPhotoLink.href = itemToEdit.photoUrl;
+                        currentPhotoLink.textContent = '現在の写真を見る';
+                    } else {
+                        currentPhotoLink.href = '#';
+                        currentPhotoLink.textContent = 'なし';
+                    }
+                    document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
+                    editModal.style.display = 'block';
                 }
-            }
-            // ▲▲▲ ここまで ▲▲▲
-        } else if (target.classList.contains('delete-btn')) {
-            if (confirm('この記録を削除してもよろしいですか？')) {
-                const result = await postData('deleteRepair', { id });
-                if(result.status === 'success') fetchAndRender();
-                else alert('削除に失敗しました。');
+            } else if (target.classList.contains('complete-btn')) {
+                const itemToComplete = maintenances.find(r => r.id.toString() === id);
+                if (!itemToComplete) return;
+                const repairer = prompt('完了担当者の名前を入力してください:');
+                if (repairer && repairer.trim() !== '') {
+                    const completionDate = new Date().toISOString().split('T')[0];
+                    const updatedData = { ...itemToComplete, status: '完了', completionDate: completionDate, repairer: repairer };
+                    const result = await postData('updateRepair', updatedData);
+                    if(result.status === 'success') { fetchAndRender(); }
+                    else { alert('更新に失敗しました。'); }
+                }
+            } else if (target.classList.contains('delete-btn')) {
+                if (confirm('この記録を削除してもよろしいですか？')) {
+                    const result = await postData('deleteRepair', { id });
+                    if(result.status === 'success') fetchAndRender();
+                    else alert('削除に失敗しました。');
+                }
             }
         }
     });
+    // ▲▲▲ ここまで ▲▲▲
 
     editForm.addEventListener('submit', (e) => {
         e.preventDefault();

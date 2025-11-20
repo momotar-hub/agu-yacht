@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ★★★ GASを再デプロイして、新しいURLに必ず更新してください ★★★
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyc1LABqPFFuRUy3P-THDr_-xV9LvjcUvayqX8i8UPiFwAxx3Hsj2pj11k47IOAQ0eI/exec';
+    const GAS_URL = 'ここにあなたの最新のGASウェブアプリのURLを貼り付け';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
@@ -9,7 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = editModal.querySelector('.modal-close');
     let maintenances = [];
 
-    // ファイルをBase64に変換する非同期関数
     const toBase64 = file => new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -38,15 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
             maintenanceList.innerHTML = '<p style="text-align:center;">メンテナンス記録はありません。</p>';
             return;
         }
-        
         maintenances.sort((a, b) => new Date(b.discoveryDate) - new Date(a.discoveryDate));
-        
         maintenances.forEach(item => {
             const card = document.createElement('div');
             card.className = 'card repair-card';
             const isCompleted = item.status === '完了';
             const billingStatusText = item.billingStatus || '未請求';
-
             card.innerHTML = `
                 <div class="repair-card-header ${isCompleted ? 'completed' : 'pending'}">
                     <h3>${item.location}</h3>
@@ -60,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div><strong>請求状況:</strong> ${billingStatusText}</div>
                         <div>
                             <strong>写真:</strong> 
-                            ${item.photoUrl ? `<a href="${item.photoUrl}" target="_blank" rel="noopener noreferrer">リンクを開く <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : 'なし'}
+                            ${item.photoUrl && item.photoUrl !== 'アップロードエラー' ? `<a href="${item.photoUrl}" target="_blank" rel="noopener noreferrer">リンクを開く <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : 'なし'}
                         </div>
                     </div>
                     ${item.remarks ? `<div class="remarks-section"><strong>備考:</strong><p>${(item.remarks || '').replace(/\n/g, '<br>')}</p></div>` : ''}
@@ -115,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         let fileData = null;
         let fileName = null;
         const fileInput = document.getElementById('photoFile');
@@ -123,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
             fileData = await toBase64(fileInput.files[0]);
             fileName = fileInput.files[0].name;
         }
-
         const newItemData = {
             discoveryDate: document.getElementById('discovery-date').value,
             discoverer: document.getElementById('discoverer').value,
@@ -145,12 +139,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     maintenanceList.addEventListener('click', async (e) => {
-        const target = e.target.closest('button');
-        if (!target) return;
-        const id = target.dataset.id;
-        
-        if (target.classList.contains('edit-btn')) {
+        const editBtn = e.target.closest('.edit-btn');
+        const deleteBtn = e.target.closest('.delete-btn');
+
+        if (editBtn) {
+            const id = editBtn.dataset.id;
             const itemToEdit = maintenances.find(r => r.id.toString() === id);
+            
             document.getElementById('edit-maintenance-id').value = itemToEdit.id;
             const currentStatus = itemToEdit.status || '対応中';
             document.querySelector(`input[name="edit-status"][value="${currentStatus}"]`).checked = true;
@@ -166,21 +161,29 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
             
             const photoLink = document.getElementById('edit-current-photo-link');
-            if (itemToEdit.photoUrl) {
+            if (itemToEdit.photoUrl && itemToEdit.photoUrl !== 'アップロードエラー') {
                 photoLink.href = itemToEdit.photoUrl;
                 photoLink.textContent = '現在の写真を表示';
-                photoLink.style.display = 'inline';
+                photoLink.parentElement.style.display = 'block';
             } else {
-                photoLink.textContent = 'なし';
+                photoLink.parentElement.style.display = 'none';
             }
+            
+            // ファイル入力欄をリセット
+            document.getElementById('edit-photoFile').value = '';
 
             editModal.style.display = 'block';
-        } else if (target.classList.contains('delete-btn')) {
+            return;
+        }
+
+        if (deleteBtn) {
+            const id = deleteBtn.dataset.id;
             if (confirm('この記録を削除してもよろしいですか？')) {
                 const result = await postData('deleteRepair', { id });
                 if(result.status === 'success') fetchAndRender();
                 else alert('削除に失敗しました。');
             }
+            return;
         }
     });
 
@@ -215,6 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
             cost: document.getElementById('edit-cost').value,
             remarks: document.getElementById('edit-remarks').value,
             billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value,
+            // ★ 新しいファイルがなければ、既存のURLを維持する
+            photoUrl: document.getElementById('edit-current-photo-link').href,
             fileData: fileData,
             fileName: fileName
         };

@@ -1,6 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // ★★★ GASを再デプロイして、新しいURLに必ず更新してください ★★★
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbytUrsKzUk5YiLtT0EMwcDuVl8u62PbFKkyxjpBusC1_vp9KjsnC8xkdnA0X2XU9BjA/exec';
+    // --- 設定 ---
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbxzdTwPLmWQ21XDx8fUi7M3OjH7w-HTm8v8G91WqZgIfnMMUFeuIyDoXxNEDwD2j_Qf/exec';
+    
+    // Cloudinary設定
+    const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dsynnnpnj/image/upload';
+    const CLOUDINARY_PRESET = 'agu_preset';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
@@ -9,12 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = editModal.querySelector('.modal-close');
     let maintenances = [];
 
-    const toBase64 = file => new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
-    });
+    // --- 写真をCloudinaryにアップロードする関数 ---
+    const uploadImage = async (file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('upload_preset', CLOUDINARY_PRESET);
+
+        const response = await fetch(CLOUDINARY_URL, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) throw new Error('Cloudinary upload failed');
+        const data = await response.json();
+        return data.secure_url; // アップロードされた画像のURLを返す
+    };
 
     const formatDate = (dateString) => {
         if (!dateString) return '';
@@ -56,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div><strong>請求状況:</strong> ${billingStatusText}</div>
                         <div>
                             <strong>写真:</strong> 
-                            ${item.photoUrl && item.photoUrl !== 'アップロードエラー' ? `<a href="${item.photoUrl}" target="_blank" rel="noopener noreferrer">リンクを開く <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : 'なし'}
+                            ${item.photoUrl && item.photoUrl !== '' ? `<a href="${item.photoUrl}" target="_blank" rel="noopener noreferrer">画像を見る <i class="fa-solid fa-arrow-up-right-from-square"></i></a>` : 'なし'}
                         </div>
                     </div>
                     ${item.remarks ? `<div class="remarks-section"><strong>備考:</strong><p>${(item.remarks || '').replace(/\n/g, '<br>')}</p></div>` : ''}
@@ -100,41 +113,53 @@ document.addEventListener('DOMContentLoaded', () => {
                 maintenances = result.data;
                 renderList();
             } else {
-                console.error('Failed to fetch data from GAS:', result);
                 maintenanceList.innerHTML = `<p style="text-align:center;">データの読み込みに失敗しました</p>`;
             }
         } catch (error) {
-            console.error('Error fetching or parsing data:', error);
             maintenanceList.innerHTML = `<p style="text-align:center;">エラーが発生しました</p>`;
         }
     };
 
+    // 新規登録フォームの処理
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        let fileData = null;
-        let fileName = null;
-        const fileInput = document.getElementById('photoFile');
-        if (fileInput.files.length > 0) {
-            fileData = await toBase64(fileInput.files[0]);
-            fileName = fileInput.files[0].name;
-        }
-        const newItemData = {
-            discoveryDate: document.getElementById('discovery-date').value,
-            discoverer: document.getElementById('discoverer').value,
-            shipNumber: document.getElementById('ship-number').value,
-            location: document.getElementById('location').value,
-            cost: document.getElementById('cost').value,
-            remarks: document.getElementById('remarks').value,
-            billingStatus: document.querySelector('input[name="billingStatus"]:checked').value,
-            fileData: fileData,
-            fileName: fileName
-        };
-        const result = await postData('addRepair', newItemData);
-        if (result.status === 'success') {
-            form.reset();
-            fetchAndRender();
-        } else { 
-            alert('登録に失敗しました。');
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerText = 'アップロード中...';
+
+        try {
+            let photoUrl = "";
+            const fileInput = document.getElementById('photoFile');
+            
+            // 写真があればCloudinaryへアップロード
+            if (fileInput.files.length > 0) {
+                photoUrl = await uploadImage(fileInput.files[0]);
+            }
+
+            const newItemData = {
+                discoveryDate: document.getElementById('discovery-date').value,
+                discoverer: document.getElementById('discoverer').value,
+                shipNumber: document.getElementById('ship-number').value,
+                location: document.getElementById('location').value,
+                cost: document.getElementById('cost').value,
+                remarks: document.getElementById('remarks').value,
+                billingStatus: document.querySelector('input[name="billingStatus"]:checked').value,
+                photoUrl: photoUrl // 保存されたURLを送る
+            };
+
+            const result = await postData('addRepair', newItemData);
+            if (result.status === 'success') {
+                form.reset();
+                fetchAndRender();
+            } else { 
+                alert('登録に失敗しました。');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('画像の送信に失敗しました。ファイルが大きすぎる可能性があります。');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '登録する';
         }
     });
 
@@ -161,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('edit-remarks').value = itemToEdit.remarks || '';
             
             const photoLink = document.getElementById('edit-current-photo-link');
-            if (itemToEdit.photoUrl && itemToEdit.photoUrl !== 'アップロードエラー') {
+            if (itemToEdit.photoUrl && itemToEdit.photoUrl !== '') {
                 photoLink.href = itemToEdit.photoUrl;
                 photoLink.textContent = '現在の写真を表示';
                 photoLink.parentElement.style.display = 'block';
@@ -169,9 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 photoLink.parentElement.style.display = 'none';
             }
             
-            // ファイル入力欄をリセット
             document.getElementById('edit-photoFile').value = '';
-
             editModal.style.display = 'block';
             return;
         }
@@ -187,48 +210,58 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // 編集フォームの送信処理
     editForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        let fileData = null;
-        let fileName = null;
-        const fileInput = document.getElementById('edit-photoFile');
-        if (fileInput.files.length > 0) {
-            fileData = await toBase64(fileInput.files[0]);
-            fileName = fileInput.files[0].name;
-        }
-        
-        let completionDate = document.getElementById('edit-completion-date').value;
-        let repairer = document.getElementById('edit-repairer').value;
-        const status = document.querySelector('input[name="edit-status"]:checked').value;
-        if (status === '対応中') {
-            completionDate = '';
-            repairer = '';
-        }
+        const submitBtn = editForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerText = '更新中...';
 
-        const updatedData = {
-            id: document.getElementById('edit-maintenance-id').value,
-            status: status,
-            discoveryDate: document.getElementById('edit-discovery-date').value,
-            discoverer: document.getElementById('edit-discoverer').value,
-            shipNumber: document.getElementById('edit-ship-number').value,
-            location: document.getElementById('edit-location').value,
-            completionDate: completionDate,
-            repairer: repairer,
-            cost: document.getElementById('edit-cost').value,
-            remarks: document.getElementById('edit-remarks').value,
-            billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value,
-            // ★ 新しいファイルがなければ、既存のURLを維持する
-            photoUrl: document.getElementById('edit-current-photo-link').href,
-            fileData: fileData,
-            fileName: fileName
-        };
-        const result = await postData('updateRepair', updatedData);
-        if (result.status === 'success') {
-            editModal.style.display = 'none';
-            fetchAndRender();
-        } else {
-            alert('更新に失敗しました。');
+        try {
+            let photoUrl = document.getElementById('edit-current-photo-link').href;
+            const fileInput = document.getElementById('edit-photoFile');
+            
+            // 新しい写真が選択されていればアップロードしてURLを上書き
+            if (fileInput.files.length > 0) {
+                photoUrl = await uploadImage(fileInput.files[0]);
+            }
+            
+            let completionDate = document.getElementById('edit-completion-date').value;
+            let repairer = document.getElementById('edit-repairer').value;
+            const status = document.querySelector('input[name="edit-status"]:checked').value;
+            if (status === '対応中') {
+                completionDate = '';
+                repairer = '';
+            }
+
+            const updatedData = {
+                id: document.getElementById('edit-maintenance-id').value,
+                status: status,
+                discoveryDate: document.getElementById('edit-discovery-date').value,
+                discoverer: document.getElementById('edit-discoverer').value,
+                shipNumber: document.getElementById('edit-ship-number').value,
+                location: document.getElementById('edit-location').value,
+                completionDate: completionDate,
+                repairer: repairer,
+                cost: document.getElementById('edit-cost').value,
+                remarks: document.getElementById('edit-remarks').value,
+                billingStatus: document.querySelector('input[name="edit-billingStatus"]:checked').value,
+                photoUrl: photoUrl
+            };
+
+            const result = await postData('updateRepair', updatedData);
+            if (result.status === 'success') {
+                editModal.style.display = 'none';
+                fetchAndRender();
+            } else {
+                alert('更新に失敗しました。');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('画像のアップロードに失敗しました。');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerText = '更新する';
         }
     });
     

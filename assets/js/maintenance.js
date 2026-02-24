@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Cloudinary設定
     const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dsynnnpnj/image/upload';
-    const CLOUDINARY_PRESET = 'agu_preset';
+    const CLOUDINARY_PRESET = 'agu_presets';
 
     const form = document.getElementById('maintenance-form');
     const maintenanceList = document.getElementById('maintenance-list');
